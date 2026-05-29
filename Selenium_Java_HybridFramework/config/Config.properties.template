@@ -1,0 +1,30 @@
+# ============================================================
+# HybridFramework — Config.properties Template
+# Copy this file to: src/test/resources/Config.properties
+# Fill in all values before running any tests.
+# ============================================================
+
+# ── Browser ──────────────────────────────────────────────────
+# Options: chrome | edge | firefox
+Browser=chrome
+
+# ── Application ───────────────────────────────────────────────
+WebsiteUrl=https://your-app-url.com/login
+username=your_test_username
+password=your_test_password
+
+# ── Environment ───────────────────────────────────────────────
+# Options: QA | DEV | STAGING | PRODUCTION
+appEnvironment=QA
+
+# ── Execution ─────────────────────────────────────────────────
+# Options: local | remote
+executionEnv=local
+
+# ── Timeouts (seconds) ────────────────────────────────────────
+ExplicitWait=10
+ImplicitWait=5
+pageLoadTimeout=30
+
+# ── Selenium Grid (only used when executionEnv=remote) ────────
+GridUrl=http://localhost:4444/wd/hub

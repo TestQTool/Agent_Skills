@@ -23,7 +23,10 @@ The frontend sends:
 - Test framework selection
 - Target repository URL
 - Target branch
+- Source branch when pull request creation is enabled
+- Pull request creation flag
 - Commit message
+- Pull request title when pull request creation is enabled
 - Selected test cases
 - API details for each selected test case
 
@@ -33,6 +36,7 @@ Each test case must include:
 - Endpoint path
 - Expected status code
 - Response assertion
+- Module name, supplied by frontend, for organizing generated tests
 
 Optional API details may include:
 - Path params
@@ -53,8 +57,9 @@ Validate before generating or pushing:
 - scriptConfiguration.language must be java
 - scriptConfiguration.testFramework must be testng
 - repository.url is required
-- repository.branch is required
+- repository.targetBranch is required. Backward compatible repository.branch may be used as target branch only for older payloads
 - repository.commitMessage is required
+- when repository.createPullRequest is true, repository.sourceBranch must be different from repository.targetBranch if sourceBranch is provided
 - at least one test case is required
 - each test case id is required
 - apiDetails.method is required
@@ -96,34 +101,71 @@ Apply basic self-healing before generation:
 
 ## Repository Behavior
 Inspect the selected client repository branch:
-- If the selected branch already contains the expected Qentrix RestAssured framework structure, update only generated/support files needed for selected test cases.
-- If the selected branch is empty, initialize the framework on that selected branch.
-- If the selected branch has unrelated or incompatible code, create a new generated branch using the qentrix/restassured-agent-N naming pattern and push the framework plus generated tests there.
+- If createPullRequest is false, commit and push generated files directly to targetBranch.
+- If createPullRequest is true, create or reuse sourceBranch from targetBranch, commit and push generated files to sourceBranch, then create a GitHub pull request from sourceBranch to targetBranch using pullRequestTitle.
+- If createPullRequest is true and sourceBranch is not provided, create the next available branch using the qentrix/restassured-agent-N naming pattern.
+- If the generation branch already contains the expected Qentrix RestAssured framework structure, update only generated/support files needed for selected test cases.
+- If the generation branch is empty or does not contain the expected framework structure, apply the Qentrix framework template from the static framework repository.
 
 Never push generated client files to the static framework repository.
 
+## Stable Generated Naming Rules
+Use the test case title plus test case id for generated file names. Reframe the title into a readable short PascalCase name, remove common filler words such as when/is/the/for, and append the test case id after an underscore.
+
+Example:
+- Test case id: 101
+- Title: Verify login API when username is empty
+- Java file: src/test/java/tests/qentrix/VerifyLoginApiUsernameEmpty_101Test.java
+- Test data file: src/test/resources/qentrix/testdata/VerifyLoginApiUsernameEmpty_101.json
+- Schema file: src/test/resources/qentrix/schemas/VerifyLoginApiUsernameEmpty_101_schema.json
+
+When the same test case is generated again with the same id/title, overwrite/update the same generated files. Do not append duplicate files. When multiple test cases are selected, update existing generated testcase files and add only the new testcase files.
+
+If the same test case id is regenerated with a changed title or changed module, treat the test case id as the stable identity. Delete older generated files for that same id and keep only the latest generated files.
+
+## Module Organization Rules
+Frontend sends module name for each selected test case using testCases[].module.
+
+Use the module name to organize generated Java tests and test data:
+- Java tests: src/test/java/tests/qentrix/{module}/
+- Test data: src/test/resources/qentrix/testdata/{module}/
+- Schemas: src/test/resources/qentrix/schemas/{module}/
+
+Use lowercase sanitized module folder/package names.
+
+Example:
+- Module: login
+- Java package: tests.qentrix.login
+- Java file: src/test/java/tests/qentrix/login/VerifyLoginApiUsernameEmpty_101Test.java
+- Test data file: src/test/resources/qentrix/testdata/login/VerifyLoginApiUsernameEmpty_101.json
+
+Generated test classes inside module packages must import shared support classes from tests.qentrix:
+- tests.qentrix.QentrixConfig
+- tests.qentrix.QentrixTestData
+- tests.qentrix.QentrixReport
+
 ## Generated File Rules
 Generate tests under:
-- src/test/java/tests/qentrix/
+- src/test/java/tests/qentrix/{module}/
 
 Generate test data under:
-- src/test/resources/qentrix/testdata/
+- src/test/resources/qentrix/testdata/{module}/
 
 Generate schemas under:
-- src/test/resources/qentrix/schemas/
+- src/test/resources/qentrix/schemas/{module}/
 
 Generate/update:
 - pom.xml
 - testng.xml
 - README.md
 - src/test/resources/qentrix/config.properties
-- src/test/resources/qentrix/testdata/*.json
-- src/test/resources/qentrix/schemas/*.json when schema validation is used
+- src/test/resources/qentrix/testdata/{ReadableTitle}_{testCaseId}.json
+- src/test/resources/qentrix/schemas/{ReadableTitle}_{testCaseId}_schema.json when schema validation is used
 - src/test/java/tests/qentrix/*Test.java
 
 ## Java Test Generation Rules
 Generated Java tests must:
-- Use package tests.qentrix
+- Use package tests.qentrix.{module}
 - Use TestNG annotations
 - Set RestAssured.baseURI from QentrixConfig.get("base.url")
 - Add Authorization header based on auth type/token from config
@@ -155,12 +197,13 @@ README must explain:
 Return a success response containing:
 - status SUCCESS
 - repository URL
-- requested branch
 - target branch
+- source branch when pull request creation is enabled
 - whether branch was created
-- commit id
+- commit id / sha
 - commit message
-- generated file paths
+- pull request URL, number, and title when pull request creation is enabled
+- generated file paths and content
 - self-heal summary
 - framework action
 

@@ -1,168 +1,168 @@
-# QA Automation — Claude Code Project Memory
-# Auto-loaded every session | Do NOT delete
+# QA Automation - Playwright JS Project Memory
+# Loaded for script generation. Keep this domain-neutral; app-specific details come from docs/app-context.md or backend project config.
 
 ---
 
-## Application Under Test
+## Goal
+Generate a self-contained Playwright JavaScript automation framework that a user can clone and run on their own machine.
 
-| Environment | URL |
-|-------------|-----|
-| QA / Demo   | https://www.example.com |
+The final repository must not depend on Qentrix backend, local prompt files, Agent_Skills, or StaticFrameworks at runtime. Those repos are generation inputs only.
 
-**Platform:** OrangeHRM OS 5.7 (self-hosted on Hostinger)
-**Auth type:** Standard HTML form login — NO Auth0, NO SSO, NO "Show more options"
+---
 
-### Login Flow
-1. Navigate to `https://www.example.com`
-2. Fill **Username** field → `input[name="username"]`
-3. Fill **Password** field → `input[name="password"]`
-4. Click **Login** button → `button[type="submit"]`
-5. Verify redirect to `/web/index.php/dashboard/index`
+## Runtime Layout
 
-### Test Credentials (from `test-data/login.csv`)
-| RoleName | Username | Password |
-|----------|----------|----------|
-| Admin | adminhrqa | Adminhrqa@321 |
+```text
+playwright-js/
+  package.json
+  playwright.config.js
+  CustomReporter.js
+  global-teardown.js
+  pages/
+    basePage.js
+    <feature>Page.js
+  pageObjects/
+    <feature>Page.js
+  tests/
+    <Feature>.test.js
+  testFixtures/
+    fixture.js
+  test-data/
+    credentials.csv
+  utils/
+    WebActions.js
+    testdata.json
+```
 
 ---
 
 ## Framework Architecture
 
-**Inheritance chain:**
-```
+```text
 CommonActions (utils/WebActions.js)
-    └── BasePage (pages/basePage.js)       ← loads testdata.json + login.csv
-            └── FeaturePage (pages/)        ← imports locators from pageObjects/
+  -> BasePage (pages/basePage.js)
+    -> FeaturePage (pages/<feature>Page.js)
 ```
 
-**Three files per feature:**
+- `pageObjects/<feature>Page.js` contains locator constants only.
+- `pages/<feature>Page.js` contains page actions and assertions.
+- `tests/<Feature>.test.js` contains test orchestration using `test.step()`.
+- `testFixtures/fixture.js` wires page classes as fixtures.
+
+---
+
+## Generated Files Per Feature
+
+For every feature, generate or update:
+
+```text
+playwright-js/pageObjects/<feature>Page.js
+playwright-js/pages/<feature>Page.js
+playwright-js/tests/<Feature>.test.js
+playwright-js/testFixtures/fixture.js
+playwright-js/package.json
 ```
-pageObjects/<feature>Page.js    ← Locator constants ONLY (no logic)
-pages/<feature>Page.js          ← Page class extending BasePage
-tests/<Feature>.test.js         ← Spec file using testFixtures/fixture
-```
+
+Only update `fixture.js` and `package.json` when needed. Preserve existing content and append missing imports, fixtures, and npm scripts without removing unrelated entries.
 
 ---
 
 ## Coding Standards
 
 ### pageObjects/<feature>Page.js
-- Named exports only — zero logic, zero imports, zero methods
-- Group with inline comments
-- OrangeHRM stable selectors use `input[name="..."]`, `button[type="submit"]`, `.oxd-*` classes
-
-```javascript
-// Navigation
-export const usernameInput  = 'input[name="username"]';
-export const loginBtn       = 'button[type="submit"]';
-export const errorAlert     = '.oxd-alert-content-text';
-```
+- Named exports only.
+- No imports, functions, classes, or logic.
+- Group locators by page area.
+- Prefer stable selectors.
+- Add `// TODO: verify selector against live app` only when exploration data is missing.
 
 ### pages/<feature>Page.js
-- `class FeaturePage extends BasePage`
-- `constructor(page) { super(page); }`
-- Import locators from `../pageObjects/<feature>Page`
-- Import `{ expect }` from `@playwright/test`
-- Navigation methods → return `await super.waitForPageLoad()`
-- Assertion methods → call `await this.wait()` first
-- Credentials → `this.getLoginDataByRole('Admin')` — NEVER hardcode
+- Import `BasePage` from `./basePage.js`.
+- Import `{ expect }` from `@playwright/test`.
+- Import all selectors from `../pageObjects/<feature>Page.js`.
+- Class extends `BasePage`.
+- Constructor calls `super(page)`.
+- Page methods use inherited `WebActions` helpers.
+- Credentials come from `this.getLoginDataByRole(roleName)` or environment-driven test data, never from hardcoded secrets.
+- Assertion methods call `await this.wait()` before assertions.
 
 ### tests/<Feature>.test.js
-- Import from `'../testFixtures/fixture'` — NOT from `@playwright/test`
-- Tags: `@smoke` and/or `@regression` on EVERY test
-- Every action wrapped in `test.step()`
-- `test.describe.parallel()` for independent tests
+- Import `test` from `../testFixtures/fixture.js`.
+- Do not import `test` from `@playwright/test`.
+- Every test title includes a TC-ID and `@smoke` or `@regression`.
+- Every async action is wrapped in `test.step()`.
+- Use `test.describe.parallel()` unless the test cases require ordered execution.
 
 ---
 
-## CommonActions Methods (from utils/WebActions.js)
+## Selector Priority
 
-| Method | Purpose |
-|--------|---------|
-| `open(url)` | Navigate to URL |
-| `waitAndClick(selector)` | Click element |
-| `waitAndFill(selector, text)` | Fill input field |
-| `waitAndClear(selector)` | Clear input field |
-| `waitForPageLoad()` | Wait for DOM content loaded |
-| `waitforNetworkIdle()` | Wait for network idle |
-| `isElementVisible(selector, errorMsg?)` | Assert element is visible |
-| `verifyElementText(selector, text)` | Assert exact text content |
-| `verifyElementContainsText(selector, text)` | Assert partial text |
-| `getElementText(selector)` | Get text content |
-| `getAllElementsText(selector)` | Get all matching elements' text |
-| `getTitle()` | Get page title |
-| `getUrl()` | Get current URL |
-| `getCount(selector)` | Count matching elements |
-| `keyPress(selector, key)` | Press key on element |
-| `wait()` | Default framework wait |
-| `refresh()` | Reload page |
-| `isFieldEditable(locator)` | Check if field is editable |
-| `checkOption(selector)` | Check checkbox/radio |
-| `generateAlphaNumeric(length)` | Generate random string |
+1. Element `id` selectors, when the id is stable and not generated.
+2. Accessibility and role-based selectors, including role, accessible name, aria-label, and label text.
+3. Dynamic XPath, when it is stable, readable, and best represents the element relationship.
+4. Stable attributes such as `data-testid`, `name`, `type`, `placeholder`, `title`, or custom semantic attributes.
+5. Stable CSS classes that are not generated or hashed.
+6. Exact text selectors as a last resort.
+
+XPath is allowed and useful when written dynamically. Prefer XPath patterns based on durable text, labels, parent/child relationships, sibling relationships, or stable attributes, such as `//*[contains(text(), "Save")]`, `//label[contains(., "Email")]/following::input[1]`, or `//*[@id="login"]//button[contains(., "Submit")]`. Avoid only brittle absolute XPath, generated ids/classes, and blind positional chains. If a selector cannot be verified from exploration, mark it with `// TODO: verify selector against live app`.
 
 ---
 
-## Test Data
+## Exploration Requirement For Accurate Scripts
 
-- **Credentials:** `test-data/login.csv` → columns: `RoleName, Username, Password, Full_Name`
-- **Static data:** `utils/testdata.json` → titles, messages, expected values
-- **Use:** `this.getLoginDataByRole('Admin')` → returns `{ Username, Password, Full_Name }`
+Approved test cases from test inventory are the behavioral source of truth, but they usually do not contain reliable element identifiers. Accurate script generation should therefore run an exploration pass against the application before final script generation.
+
+The exploration pass must follow the selected test-case steps in order, inspect the live DOM, capture stable selectors, record screenshots or notes for important states, and then feed those selector findings into `build-scripts`. If exploration data is missing, generated selectors are best-effort and must be marked for verification.
 
 ---
 
-## OrangeHRM Selector Reference
+## Skill Read Order
 
-```javascript
-// Login page
-input[name="username"]           // Username input
-input[name="password"]           // Password input
-button[type="submit"]            // Login button
-.oxd-alert-content-text          // "Invalid credentials" error
-span:has-text("Required")        // Empty field validation
+For automation script generation, read and apply the prompt files in this order:
 
-// Post-login
-nav[aria-label="Sidepanel"]      // Left sidebar navigation
-.oxd-userdropdown-tab            // Profile icon (top-right)
-li[role="menuitem"]:has-text("Logout")  // Logout menu item
+1. `CLAUDE.md`
+2. `docs/onboarding-guide.md`
+3. `docs/app-context.md` or client/project-specific app context
+4. `standards/playwright-standards.md`
+5. `explore/SKILL.md` when selector discovery/exploration is needed
+6. `build-scripts/SKILL.md`
+7. `run-ready-framework/SKILL.md`
+8. `../GitHub_Workflow/SKILL.md`
+9. Static framework files from `StaticFrameworks/playwright-js`
+10. Selected test inventory cases and existing target repository files
 
-// General OrangeHRM patterns
-.oxd-main-menu-item              // Sidebar nav items
-.oxd-table-body .oxd-table-row   // Table rows
-button.oxd-button--secondary     // Secondary action buttons (Add, Search)
+Use `heal/SKILL.md` only for failing or broken existing scripts.
+
+---
+
+## Runtime Rules
+
+Generated code must run after:
+
+```bash
+cd playwright-js
+npm install
+npx playwright install
+npm test
 ```
 
----
+Specific generated scripts should also work, for example:
 
-## Skill Commands
+```bash
+npm run test:Login-Smoke-Chrome
+npm run test:Login-Regression-Chrome
+```
 
-| Command | What it does |
-|---------|-------------|
-| `/explore <feature>` | Browse app with Playwright MCP, document all UI flows |
-| `/generate-tests <feature>` | Generate structured test cases (MD + CSV) from exploration |
-| `/build-scripts <feature>` | Convert approved test cases to Playwright JS files |
-| `/heal <feature>` | Fix broken selectors in existing tests |
+Use environment variables for machine-specific values:
 
----
+```text
+BASE_URL=<application url>
+TEST_ROLE=Admin
+HEADLESS=true
+```
 
-## File Naming Conventions
+Do not write local absolute paths, backend URLs, GitHub tokens, API keys, or prompt repository paths into generated files.
 
-| Artifact | Pattern | Example |
-|----------|---------|---------|
-| Test spec | `<Module>.test.js` | `Login.test.js` |
-| Page class | `<feature>Page.js` | `loginPage.js` |
-| Page object | `<feature>Page.js` | `loginPage.js` |
-| Test cases (MD) | `test-cases/<feature>/test-cases.md` | |
-| Test cases (CSV) | `test-cases/<feature>/test-cases.csv` | |
-| Exploration notes | `test-cases/<feature>/exploration-notes.md` | |
 
----
 
-## Module Prefixes
 
-| Module | Prefix | Test File |
-|--------|--------|-----------|
-| Login / Logout | LGN | `Login.test.js` |
-| Dashboard | DSH | `Dashboard.test.js` |
-| PIM | PIM | `PIM.test.js` |
-| Leave | LVE | `Leave.test.js` |
-| Admin Users | ADM | `AdminUsers.test.js` |

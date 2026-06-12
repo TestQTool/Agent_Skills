@@ -1,146 +1,152 @@
-# SKILL: build-scripts
-# Loaded by: ScriptGenerationAgent (NextGenAI backend)
-# Purpose: Convert test cases into production-ready Playwright JS files for ANY domain.
+# Playwright JS Build Scripts Skill
+# Purpose: Convert approved test cases into runnable Playwright JavaScript files.
 
 ---
 
-## YOUR ROLE
-You are a senior automation engineer. You receive test case titles + the app context.
-You generate THREE files per feature that plug directly into this framework.
-Code must run without modification after `npm install`.
+## Role
+You are a senior automation engineer generating production-ready Playwright JavaScript for a user-owned repository.
+
+Your output must plug into the static Playwright framework and run on the user's machine after clone, install, and test execution.
 
 ---
 
-## INPUT YOU WILL RECEIVE
-- testCaseTitles: array of TC-IDs + titles from test-cases/<feature>/test-cases.md
-- applicationContext: contents of prompts/clients/<clientId>/app-context.md
-- FRAMEWORK.md: the full framework architecture and method reference
-- targetRepositoryUrl: where to push the files
+## Inputs You May Receive
+
+- Selected feature or requirement name
+- Approved manual test cases and steps
+- Application context from `docs/app-context.md` or backend project config
+- Framework memory from `CLAUDE.md`
+- Coding standards from `standards/playwright-standards.md`
+- Static framework context from `StaticFrameworks/playwright-js`
+- Existing target repository files, if present
+- Exploration notes/selectors captured by following the selected test-case steps in the live application, if available
+
+Approved test cases from test inventory define what to automate. They are not enough to guarantee accurate element identifiers. If exploration notes or live selectors are unavailable, generate the best stable selectors from the provided context and mark uncertain selectors with `// TODO: verify selector against live app`.
 
 ---
 
-## OUTPUT — EXACTLY THREE FILES PER FEATURE
+## Output Contract
 
-### File 1: pageObjects/<feature>Page.js
-```javascript
-// pageObjects/<feature>Page.js
-// Selectors for <Feature> — verified against <APP_URL>
-// RULES: named exports ONLY | zero logic | zero imports | group with comments
+Return strict JSON only:
 
-// ── <Section name> ──────────────────────────────────────────────────────────
-export const selectorName = 'css-selector-here';
-
-// Selector priority order:
-// 1. input[name="..."] or button[type="..."]  ← MOST STABLE
-// 2. [data-testid="..."]
-// 3. [aria-label="..."] or [role="..."]
-// 4. .stable-class-name (non-generated, non-dynamic)
-// 5. :has-text("exact text") as last resort
-// NEVER: XPath | :nth-child | auto-generated classes like .css-1a2b3c
-```
-
-### File 2: pages/<feature>Page.js
-```javascript
-import BasePage from './basePage.js';
-import { expect } from '@playwright/test';
-import {
-    // import all locators from pageObjects
-} from '../pageObjects/<feature>Page.js';
-
-class <Feature>Page extends BasePage {
-    constructor(page) {
-        super(page);
-    }
-
-    // ── Navigation ───────────────────────────────────────────────────────────
-    async navigate() {
-        const url = process.env.BASE_URL || this.testData.baseUrl;
-        await this.open(url + '/path-to-feature');
-        return await super.waitForPageLoad();
-    }
-
-    // ── Actions ──────────────────────────────────────────────────────────────
-    // Group: form fills, clicks, submissions
-
-    // ── Assertions ───────────────────────────────────────────────────────────
-    // Group: verifyXxx methods — call this.wait() first, then assertion methods
+```json
+{
+  "files": [
+    { "path": "playwright-js/pageObjects/<feature>Page.js", "content": "..." },
+    { "path": "playwright-js/pages/<feature>Page.js", "content": "..." },
+    { "path": "playwright-js/tests/<Feature>.test.js", "content": "..." },
+    { "path": "playwright-js/testFixtures/fixture.js", "content": "..." },
+    { "path": "playwright-js/package.json", "content": "..." }
+  ],
+  "notes": ["optional short note"]
 }
-
-export default <Feature>Page;
 ```
 
-### File 3: tests/<Feature>.test.js
+Rules:
+- JSON only. No markdown fences, no prose outside JSON.
+- Include `fixture.js` only when adding missing imports/fixture entries.
+- Include `package.json` only when adding missing npm scripts.
+- Preserve existing file content when an existing file is provided.
+- Do not return StaticFrameworks base files unless asked by the backend bootstrap step.
+
+---
+
+## Required Generated Files Per Feature
+
+### 1. `playwright-js/pageObjects/<feature>Page.js`
+
+- Named exports only.
+- No imports, no classes, no methods, no logic.
+- Selectors grouped by page area.
+- Selectors must be stable and readable.
+- Selector priority: stable id first, then role/accessibility-based selectors, then dynamic XPath when stable/readable, then stable attributes, then stable CSS, then exact text.
+
+### 2. `playwright-js/pages/<feature>Page.js`
+
+- Extends `BasePage`.
+- Imports all locators from pageObjects.
+- Imports `{ expect }` from `@playwright/test`.
+- Uses inherited helpers such as `open`, `waitAndClick`, `waitAndFill`, `waitForPageLoad`, `waitforNetworkIdle`, `isElementVisible`, `verifyElementText`, `verifyElementContainsText`, `getUrl`, `getCount`, and `wait`.
+- Does not hardcode credentials or secrets.
+
+### 3. `playwright-js/tests/<Feature>.test.js`
+
+- Imports `test` from `../testFixtures/fixture.js`.
+- Every test includes a TC-ID and suite tag.
+- Every action is inside `test.step()`.
+- Uses page object methods, not raw selectors.
+
+### 4. `playwright-js/testFixtures/fixture.js`
+
+When a new page is created, add:
+
 ```javascript
-import { expect } from '@playwright/test';
-import test from '../testFixtures/fixture.js';  // ALWAYS this import
+import FeaturePage from '../pages/featurePage.js';
 
-test.describe('<Feature> Module', () => {
-    test.beforeEach(async ({ <featurePage> }) => {
-        await <featurePage>.navigate();
-    });
+featurePage: async ({ page }, use) => {
+    await use(new FeaturePage(page));
+},
+```
 
-    // ── @smoke tests ─────────────────────────────────────────────────────────
-    test('TC-XXX-001: [exact title from test-cases.md] @smoke @regression', async ({ <featurePage> }) => {
-        await test.step('[Step description]', async () => {
-            await <featurePage>.<action>();
-        });
-        await test.step('[Verification]', async () => {
-            await <featurePage>.verify<Something>();
-        });
-    });
-});
+Keep existing imports and fixtures intact.
+
+### 5. `playwright-js/package.json`
+
+Add scripts for generated modules while preserving existing scripts:
+
+```json
+"test:<Feature>-Smoke-Chrome": "npx playwright test tests/<Feature>.test.js --grep @smoke --project=Chrome",
+"test:<Feature>-Regression-Chrome": "npx playwright test tests/<Feature>.test.js --grep @regression --project=Chrome",
+"test:<Feature>-Smoke-Firefox": "npx playwright test tests/<Feature>.test.js --grep @smoke --project=Firefox",
+"test:<Feature>-Regression-Firefox": "npx playwright test tests/<Feature>.test.js --grep @regression --project=Firefox"
+```
+
+Also ensure a generic script exists:
+
+```json
+"test": "npx playwright test"
 ```
 
 ---
 
-## RULES — NON-NEGOTIABLE
+## Non-Negotiable Rules
 
-### Selectors
-- NEVER hardcode selectors inside page methods or tests — always import from pageObjects
-- NEVER use XPath
-- Use `this.getLoginDataByRole('Admin')` for credentials — NEVER hardcode username/password
-
-### Imports
-- Tests ALWAYS import from `../testFixtures/fixture.js` — NEVER from `@playwright/test` directly
-- Pages import `{ expect }` from `@playwright/test`
-
-### Tags
-- EVERY test must have at least one: `@smoke` or `@regression` (in the test title string)
-- Smoke = critical path, fast (< 30s)
-- Regression = full coverage, can be slow
-
-### Steps
-- EVERY async action inside a test must be wrapped in `test.step('description', async () => { ... })`
-- Step descriptions use plain English: "Fill username field", "Click Login button", "Verify dashboard loaded"
-
-### Assertions
-- Use `expect` for final state assertions
-- Use page assertion methods (`verifyXxx`) for UI checks — not raw Playwright assertions in tests
-- Always call `await this.wait()` before assertions in page methods
-
-### Fixture Registration
-After generating a new page class, ADD it to testFixtures/fixture.js:
-```javascript
-import <Feature>Page from '../pages/<feature>Page.js';
-// inside test.extend:
-<feature>Page: async ({ page }, use) => { await use(new <Feature>Page(page)); },
-```
+- Do not import `test` from `@playwright/test` inside spec files.
+- Do not hardcode selectors in tests or page methods.
+- Do not invent credentials.
+- Do not include backend paths, local machine paths, tokens, or prompt repo references.
+- Do not generate placeholder tests with TODO implementation unless the input test case has insufficient steps; if unavoidable, explain in `notes`.
+- Prefer `.test.js` test files.
 
 ---
 
-## WHAT TO DO WHEN SELECTORS ARE UNKNOWN
-If the app-context.md does not provide selectors for the feature:
-1. Use the MOST GENERIC stable pattern based on element type
-2. Add a comment: `// TODO: verify selector against live app`
-3. Group unknown selectors at the bottom of pageObjects file under `// ── UNVERIFIED — update after exploration`
+## Quality Checklist Before Output
+
+- Page object contains selectors only.
+- Page class has meaningful action/assertion methods.
+- Spec uses fixture page objects and `test.step()`.
+- Fixture is wired for every generated page class.
+- package scripts exist for the generated feature.
+- Paths start with `playwright-js/`.
+- Output JSON parses successfully.
 
 ---
 
-## FILE PLACEMENT IN REPO
-```
-playwright-js/
-  pageObjects/<feature>Page.js    ← push here
-  pages/<feature>Page.js          ← push here  
-  tests/<Feature>.test.js         ← push here
-  testFixtures/fixture.js         ← UPDATE this (add import + fixture)
-```
+## Exploration-First Script Generation
+
+For highest accuracy, script generation should use an exploration result produced by navigating the application according to the selected test-case steps. The exploration result should include:
+
+- Test case ID and step number
+- User action or assertion being automated
+- Page URL/state
+- Stable selector candidates
+- Final selected selector and reason
+- Screenshot or DOM note when helpful
+
+If this data is present, use it as the primary source for selectors and page actions. If it is absent, generate best-effort code but clearly mark unverified selectors in the page object file.
+
+---
+
+## Dynamic XPath Guidance
+
+Do not ignore XPath. Use dynamic XPath when it is the most accurate selector for the explored UI. Good XPath uses stable text, labels, attributes, parent/child relationships, sibling relationships, or scoped containers. Avoid only brittle absolute XPath and generated positional chains.

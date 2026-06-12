@@ -1,272 +1,133 @@
-# Playwright Coding Standards — Framework Structure
+# Playwright Coding Standards - Framework Structure
 
-All generated Playwright scripts MUST match the existing codebase patterns exactly.
-Read `CLAUDE.md` for the full architecture. This file is the coding spec.
-
----
-
-## File Outputs per Feature
-
-When generating scripts for feature `<feature>`, always create THREE files:
-
-```
-pageObjects/<feature>Page.js     ← Locators ONLY
-pages/<feature>Page.js           ← Page class with methods
-tests/<Feature>.test.js          ← Spec file with test cases
-```
+Generated Playwright scripts must match the static framework in `StaticFrameworks/playwright-js` and must run after the user clones the target repository.
 
 ---
 
-## 1. pageObjects/<feature>Page.js — Locators File
+## File Outputs Per Feature
 
-**Rules:**
-- Named exports ONLY
-- CSS selectors preferred → `data-testid` → ARIA → text-based
-- Zero logic, zero methods, zero imports (except type hints if needed)
-- Group related locators with inline comments
-
-```javascript
-// pageObjects/dashboardPage.js
-
-// Navigation
-export const homeNavLink         = '[data-testid="nav-home"]';
-export const dashboardNavLink    = '[data-testid="nav-dashboard"]';
-
-// Dashboard header
-export const pageTitle           = 'h1.dashboard-title';
-export const lastUpdatedLabel    = '.last-updated-text';
-
-// Filters
-export const dateRangeDropdown   = '[data-testid="date-range-filter"]';
-export const applyFiltersBtn     = '[data-testid="apply-filters"]';
-export const resetFiltersBtn     = '[data-testid="reset-filters"]';
-
-// Data table
-export const dataTable           = '[data-testid="results-table"]';
-export const tableRows           = '[data-testid="results-table"] tbody tr';
-export const noResultsMessage    = '[data-testid="no-results-message"]';
-
-// Validation / Error
-export const errorToast          = '.toast-error';
-export const successToast        = '.toast-success';
+```text
+playwright-js/pageObjects/<feature>Page.js
+playwright-js/pages/<feature>Page.js
+playwright-js/tests/<Feature>.test.js
+playwright-js/testFixtures/fixture.js
+playwright-js/package.json
 ```
+
+The first three are feature files. `fixture.js` and `package.json` are framework wiring files and must be updated only when necessary.
 
 ---
 
-## 2. pages/<feature>Page.js — Page Class
+## pageObjects Rules
 
-**Rules:**
-- Extends `BasePage`
-- Constructor calls `super(page)`
-- Import all locators from `../pageObjects/<feature>Page`
-- Import `{ expect }` from `@playwright/test`
-- Method = one meaningful user action OR one meaningful assertion
-- Navigation methods return `await super.waitForPageLoad()`
-- Assertion methods use `await this.wait()` before asserting
-- Use `this.testData.<key>` for expected values (not hardcoded strings)
-- Use `this.getLoginDataByRole('RoleName')` for credentials
+- Named exports only.
+- No imports.
+- No functions, classes, conditionals, or runtime logic.
+- Group locators by section.
+- Use clear names ending in element type where useful: `loginButton`, `emailInput`, `statusDropdown`, `resultsTable`.
 
-```javascript
-// pages/dashboardPage.js
-import BasePage from './basePage';
-import { expect } from '@playwright/test';
-import {
-    homeNavLink,
-    pageTitle,
-    dateRangeDropdown,
-    applyFiltersBtn,
-    dataTable,
-    tableRows,
-    noResultsMessage,
-    errorToast,
-    successToast
-} from '../pageObjects/dashboardPage';
+Selector priority:
 
-class DashboardPage extends BasePage {
-    constructor(page) {
-        super(page);
-    }
+1. Stable `id` selector, for example `#login-button`.
+2. Role/accessibility selector, for example `getByRole('button', { name: 'Login' })`, `[role="button"]`, `[aria-label="Login"]`, or label text.
+3. Dynamic XPath when it is stable, readable, and tied to durable text, attributes, parent/child relationships, or sibling relationships.
+4. Stable attributes such as `[data-testid="..."]`, `[name="..."]`, `[type="..."]`, `[placeholder="..."]`, or `[title="..."]`.
+5. Stable CSS classes that are not generated or hashed.
+6. Exact text selectors as a last resort.
 
-    // --- Navigation ---
-    async navigateToDashboard() {
-        await this.waitAndClick(homeNavLink);
-        return await super.waitForPageLoad();
-    }
-
-    // --- Actions ---
-    async applyDateFilter(dateRange) {
-        await this.selectDropdown(dateRangeDropdown, dateRange);
-        await this.waitAndClick(applyFiltersBtn);
-        return await super.waitforNetworkIdle();
-    }
-
-    async resetFilters() {
-        await this.waitAndClick(resetFiltersBtn);
-        return await super.waitForPageLoad();
-    }
-
-    // --- Assertions ---
-    async verifyDashboardLoaded() {
-        await this.wait();
-        await this.isElementVisible(pageTitle, this.testData.notVisibleText);
-        expect(await this.getUrl()).toContain('/dashboard');
-    }
-
-    async verifyDataTableVisible() {
-        await this.wait();
-        await this.isElementVisible(dataTable, this.testData.notVisibleText);
-    }
-
-    async verifyNoResultsState() {
-        await this.wait();
-        await this.isElementVisible(noResultsMessage, this.testData.notVisibleText);
-    }
-
-    async verifyRowCount(expectedCount) {
-        const count = await this.getCount(tableRows);
-        expect(count).toBe(expectedCount);
-    }
-
-    async verifySuccessToast() {
-        await this.isElementVisible(successToast, this.testData.notVisibleText);
-    }
-
-    async verifyErrorToast() {
-        await this.isElementVisible(errorToast, this.testData.notVisibleText);
-    }
-}
-
-export default DashboardPage;
-```
+XPath is valid when it improves reliability or expresses relationships better than CSS. Prefer dynamic XPath such as `//*[contains(text(), "Save")]`, `//button[contains(., "Submit")]`, `//label[contains(., "Email")]/following::input[1]`, `//*[contains(@class,"modal")]//button[contains(.,"Cancel")]`, or parent/child/sibling expressions based on stable labels. Avoid only brittle absolute XPath, generated ids/classes, and blind positional chains such as `/html/body/div[2]/div[3]/button[1]`.
 
 ---
 
-## 3. tests/<Feature>.test.js — Spec File
+## Page Class Rules
 
-**Rules:**
-- Import from `'../testFixtures/fixture'` — NOT from `@playwright/test`
-- Every test tagged with `@smoke` and/or `@regression`
-- Every action inside `test.step()`
-- `test.describe.parallel()` for independent tests
-- `test.describe.serial()` ONLY when tests have strict order dependency
-- Test name format: `@regression @smoke [What is being verified] for [condition]`
-- Data-driven tests use `for...of` loops over parsed CSV data (see Login.test.js pattern)
-
-```javascript
-// tests/Dashboard.test.js
-import test from '../testFixtures/fixture';
-
-test.describe.parallel('@Dashboard: Verify dashboard functionality', () => {
-
-    test('@regression @smoke Verify dashboard loads for Admin user', async ({ loginPage, dashboardPage }) => {
-        await test.step('Open the application', async () => {
-            await loginPage.openApp();
-        });
-        await test.step('Login with Auth0 as Admin', async () => {
-            await loginPage.auth0Login();
-            await loginPage.LoginWithValidCredentials(
-                dashboardPage.getLoginDataByRole('Admin').Email,
-                dashboardPage.getLoginDataByRole('Admin').Password
-            );
-        });
-        await test.step('Verify landing page after login', async () => {
-            await loginPage.verifyLandingPage();
-        });
-        await test.step('Navigate to Dashboard', async () => {
-            await dashboardPage.navigateToDashboard();
-        });
-        await test.step('Verify dashboard is loaded', async () => {
-            await dashboardPage.verifyDashboardLoaded();
-        });
-    });
-
-    test('@regression Verify no results state when no data matches filter', async ({ loginPage, dashboardPage }) => {
-        await test.step('Open and login', async () => {
-            await loginPage.openApp();
-            await loginPage.auth0Login();
-            await loginPage.LoginWithAnalystCredentials();
-        });
-        await test.step('Apply a filter that returns no results', async () => {
-            await dashboardPage.applyDateFilter('Custom - No Data Range');
-        });
-        await test.step('Verify empty state is displayed', async () => {
-            await dashboardPage.verifyNoResultsState();
-        });
-    });
-
-});
-```
+- File path: `playwright-js/pages/<feature>Page.js`.
+- Import `BasePage` from `./basePage.js`.
+- Import `{ expect }` from `@playwright/test`.
+- Import selectors from `../pageObjects/<feature>Page.js`.
+- Class name: `<Feature>Page`.
+- Constructor: `constructor(page) { super(page); }`.
+- One page method should represent one user action or assertion.
+- Navigation methods return `await super.waitForPageLoad()` or `await super.waitforNetworkIdle()`.
+- Assertion methods call `await this.wait()` first.
+- Use `this.testData` and `this.getLoginDataByRole(roleName)` instead of hardcoded data.
 
 ---
 
-## 4. testFixtures/fixture.js — Wiring New Pages
+## Spec Rules
 
-When you add a new page class, add it to the fixture file:
-
-```javascript
-// In testFixtures/fixture.js — ADD your new page:
-import DashboardPage from '../pages/dashboardPage';
-
-const test = base.extend({
-    // ... existing fixtures ...
-
-    dashboardPage: async ({ page }, use) => {
-        await use(new DashboardPage(page));
-    },
-});
-```
+- File path: `playwright-js/tests/<Feature>.test.js`.
+- Import `test` from `../testFixtures/fixture.js`.
+- Do not import `test` from `@playwright/test`.
+- Every test title includes a TC-ID.
+- Every test title includes `@smoke`, `@regression`, or both.
+- Every user action and assertion is wrapped in `test.step()`.
+- Use page object methods only.
+- Use `test.describe.parallel()` unless test order is required.
 
 ---
 
-## 5. Selector Priority
+## Fixture Rules
 
-1. `[data-testid="..."]` — most stable, always prefer
-2. ARIA roles: `page.getByRole('button', { name: 'Submit' })`
-3. Labels: `page.getByLabel('Email')`
-4. CSS class (only stable, non-dynamic classes)
-5. **Never**: XPath, positional (`:nth-child`), or auto-generated class names
+When a new page class is generated, update `playwright-js/testFixtures/fixture.js`.
+
+Add import:
+
+```javascript
+import FeaturePage from '../pages/featurePage.js';
+```
+
+Add fixture entry:
+
+```javascript
+featurePage: async ({ page }, use) => {
+    await use(new FeaturePage(page));
+},
+```
+
+Preserve all existing imports and fixture entries.
 
 ---
 
-## 6. Common Patterns
+## package.json Rules
 
-### Login before every test (preferred pattern)
-```javascript
-// In pages — use role-specific login methods:
-await loginPage.LoginWithStewardCredentials();
-await loginPage.LoginWithAnalystCredentials();
-await loginPage.LoginWithBusinessUserCredentials();
-// Or for any role from CSV:
-await loginPage.LoginWithValidCredentials(email, password);
-```
+Generated feature scripts should be added without removing existing scripts.
 
-### Wait patterns
-```javascript
-await this.waitForPageLoad();     // DOM content loaded
-await this.waitforNetworkIdle();  // All network requests settled
-await this.wait();                // Default framework wait before assertions
-```
+Required generic script:
 
-### Iframe interactions
-```javascript
-// Always pass iframeSelector as last argument to any CommonAction method
-await this.waitAndClick(selector, iframeSelector);
-await this.waitAndFill(selector, text, 'first', iframeSelector);
-await this.isElementVisible(selector, errorMsg, iframeSelector);
-```
-
-### API testing pattern
-```javascript
-// Use validateApiWithToken from CommonActions
-await this.validateApiWithToken(endpoint, process.env.ADP_API_TOKEN, true);
-```
-
----
-
-## 7. npm Script Naming (for new modules)
-
-When adding a new module called `NewModule`, add to `package.json`:
 ```json
-"test:NewModule-Smoke-Chrome":      "PLAYWRIGHT_SUITE=smoke npx playwright test tests/NewModule.test.js --grep @smoke --project=Chrome",
-"test:NewModule-Regression-Chrome": "PLAYWRIGHT_SUITE=regression npx playwright test tests/NewModule.test.js --grep @regression --project=Chrome"
+"test": "npx playwright test"
 ```
+
+Feature scripts:
+
+```json
+"test:<Feature>-Smoke-Chrome": "npx playwright test tests/<Feature>.test.js --grep @smoke --project=Chrome",
+"test:<Feature>-Regression-Chrome": "npx playwright test tests/<Feature>.test.js --grep @regression --project=Chrome"
+```
+
+Firefox scripts are recommended when the framework has a Firefox project configured.
+
+---
+
+## Runtime Rules
+
+The generated repository must run on a user machine with:
+
+```bash
+cd playwright-js
+npm install
+npx playwright install
+npm test
+```
+
+Do not write absolute local paths, backend URLs, prompt repository URLs, API tokens, GitHub tokens, or secrets into generated files.
+
+---
+
+## Exploration-Backed Selector Rule
+
+Test inventory cases provide the expected behavior and steps. They do not guarantee accurate selectors. Before final script generation, the system should explore the live application by following the selected test-case steps and capture selectors for every interacted element and assertion state.
+
+When exploration results are available, generated scripts must use those explored selectors. When exploration results are not available, selectors are best-effort and uncertain selectors must be marked with `// TODO: verify selector against live app`.
+

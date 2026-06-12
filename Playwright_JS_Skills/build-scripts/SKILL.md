@@ -21,7 +21,7 @@ Your output must plug into the static Playwright framework and run on the user's
 - Existing target repository files, if present
 - Exploration notes/selectors captured by following the selected test-case steps in the live application, if available
 
-Approved test cases from test inventory define what to automate. They are not enough to guarantee accurate element identifiers. If exploration notes or live selectors are unavailable, generate the best stable selectors from the provided context and mark uncertain selectors with `// TODO: verify selector against live app`.
+Approved test cases from test inventory define what to automate. They are not enough to guarantee accurate element identifiers. Consume exploration notes or selector findings only when they are supplied by the backend/request; do not load or run `explore/SKILL.md` as part of normal script generation. If exploration notes or live selectors are unavailable, continue script generation by inferring the best stable selectors from the approved test steps, app context, existing repository files, labels/placeholders, common ids/names, and stable UI text. Mark uncertain selectors with `// TODO: verify selector against live app`.
 
 ---
 
@@ -134,7 +134,7 @@ Also ensure a generic script exists:
 
 ## Exploration-First Script Generation
 
-For highest accuracy, script generation should use an exploration result produced by navigating the application according to the selected test-case steps. The exploration result should include:
+For highest accuracy, script generation should consume an exploration result, when one is supplied, produced by navigating the application according to the selected test-case steps. The exploration result should include:
 
 - Test case ID and step number
 - User action or assertion being automated
@@ -143,7 +143,24 @@ For highest accuracy, script generation should use an exploration result produce
 - Final selected selector and reason
 - Screenshot or DOM note when helpful
 
-If this data is present, use it as the primary source for selectors and page actions. If it is absent, generate best-effort code but clearly mark unverified selectors in the page object file.
+If this data is present, use it as the primary source for selectors and page actions. If it is absent, generate best-effort code using the fallback selector inference rules and clearly mark unverified selectors in the page object file.
+
+---
+
+## Fallback Selector Inference
+
+Use this only when exploration notes/selectors are not supplied.
+
+Infer selectors from the test-step intent and the visible UI language implied by the step:
+
+- For fill steps, infer stable input selectors from field names: `#username`, `[name="username"]`, `input[placeholder*="Username"]`, `//label[contains(., "Username")]/following::input[1]`.
+- For password steps, prefer `#password`, `[name="password"]`, `input[type="password"]`, or a label-based XPath.
+- For click steps, infer button/link selectors from action text: `#login`, `button[type="submit"]`, `getByRole('button', { name: 'Login' })`, `//button[contains(., "Login")]`.
+- For select/dropdown steps, infer by label first, then role/combobox, then stable XPath from nearby label.
+- For assertions, infer URL, heading, toast, validation message, table row, modal, enabled/disabled state, or visible text based on the expected result.
+- Prefer stable `id` first, then role/accessibility, then dynamic XPath, then stable attributes, then stable CSS, then exact text.
+
+Fallback selectors are allowed, but they must be readable and marked when unverified. Do not invent brittle absolute XPath or generated class selectors.
 
 ---
 

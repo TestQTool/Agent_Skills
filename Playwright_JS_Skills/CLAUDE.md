@@ -108,11 +108,11 @@ XPath is allowed and useful when written dynamically. Prefer XPath patterns base
 
 ---
 
-## Exploration Requirement For Accurate Scripts
+## Exploration Findings For Accurate Scripts
 
-Approved test cases from test inventory are the behavioral source of truth, but they usually do not contain reliable element identifiers. Accurate script generation should therefore run an exploration pass against the application before final script generation.
+Approved test cases from test inventory are the behavioral source of truth. Automation script generation must not load or run `explore/SKILL.md` by default.
 
-The exploration pass must follow the selected test-case steps in order, inspect the live DOM, capture stable selectors, record screenshots or notes for important states, and then feed those selector findings into `build-scripts`. If exploration data is missing, generated selectors are best-effort and must be marked for verification.
+If exploration notes, selector findings, DOM snapshots, or screenshots are supplied, treat them as the first-priority evidence for selectors, waits, page actions, and assertions. If exploration data is missing, do not block script generation. Fall back to intelligent selector inference from the approved test-case steps, app context, existing repository files, and common stable UI patterns; mark uncertain selectors with `// TODO: verify selector against live app`.
 
 ---
 
@@ -124,12 +124,13 @@ For automation script generation, read and apply the prompt files in this order:
 2. `docs/onboarding-guide.md`
 3. `docs/app-context.md` or client/project-specific app context
 4. `standards/playwright-standards.md`
-5. `explore/SKILL.md` when selector discovery/exploration is needed
-6. `build-scripts/SKILL.md`
-7. `run-ready-framework/SKILL.md`
-8. `../GitHub_Workflow/SKILL.md`
-9. Static framework files from `StaticFrameworks/playwright-js`
-10. Selected test inventory cases and existing target repository files
+5. `build-scripts/SKILL.md`
+6. `run-ready-framework/SKILL.md`
+7. `../GitHub_Workflow/SKILL.md`
+8. Static framework files from `StaticFrameworks/playwright-js`
+9. Selected test inventory cases, supplied exploration findings, and existing target repository files
+
+Do not read `explore/SKILL.md` during normal automation script generation. Use it only in a separate exploration workflow that produces exploration notes or selector findings before script generation. Automation script generation must still proceed when those artifacts are absent by using the fallback selector inference rules.
 
 Use `heal/SKILL.md` only for failing or broken existing scripts.
 

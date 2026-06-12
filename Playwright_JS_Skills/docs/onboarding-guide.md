@@ -24,12 +24,13 @@ Read these files in this exact order for normal automation script generation:
 2. `docs/onboarding-guide.md` - skill orchestration, repository split, and end-to-end generation flow.
 3. `docs/app-context.md` or client/project-specific app context - application URL, auth, roles, modules, and known behavior.
 4. `standards/playwright-standards.md` - code structure, selector priority, fixture rules, package scripts, and runtime rules.
-5. `explore/SKILL.md` - use when exploration is available or when selector accuracy is required before script generation.
-6. `build-scripts/SKILL.md` - convert approved test inventory cases plus exploration findings into Playwright files.
-7. `run-ready-framework/SKILL.md` - verify/correct final framework packaging before push.
-8. `../GitHub_Workflow/SKILL.md` - branch, commit, PR, merge-readiness, and conflict rules.
-9. Static framework files from `StaticFrameworks/playwright-js` - runnable base files that must be copied into the target repo.
-10. Selected test cases from test inventory and existing target repo files - behavior source and merge context.
+5. `build-scripts/SKILL.md` - convert approved test inventory cases plus any supplied exploration findings into Playwright files.
+6. `run-ready-framework/SKILL.md` - verify/correct final framework packaging before push.
+7. `../GitHub_Workflow/SKILL.md` - branch, pull/sync, commit, PR, merge-readiness, and conflict rules.
+8. Static framework files from `StaticFrameworks/playwright-js` - runnable base files that must be copied into the target repo.
+9. Selected test cases from test inventory, supplied exploration findings, and existing target repo files - behavior source, selector context, and merge context.
+
+Use `explore/SKILL.md` only in a separate exploration workflow that produces notes/selectors before script generation. Do not load it by default for automation script generation.
 
 Use `heal/SKILL.md` only after execution failures or known UI selector breakage. It is not part of the normal first-time script generation read order.
 
@@ -79,18 +80,9 @@ Generated target repositories must contain the runnable framework files. They mu
 
 ## Accuracy Note
 
-Converting test inventory cases directly into scripts is only behaviorally accurate. Selector accuracy requires exploration. The intended flow is:
+Converting test inventory cases directly into scripts is behaviorally accurate, but selector accuracy improves when exploration findings are provided. The current automation script generation flow should consume supplied exploration notes/selectors as first-priority evidence; it should not run exploration by itself, and it should not block generation when exploration findings are absent. In that case, generate scripts using fallback selector inference from test steps, app context, and stable UI patterns.
 
-1. Read `CLAUDE.md`.
-2. Read `docs/onboarding-guide.md`.
-3. Read app context, standards, and the selected skill files.
-4. Read selected test cases from inventory.
-5. Explore the live application by following those exact steps.
-6. Capture stable selectors using the selector priority in the standards file.
-7. Generate scripts from test cases plus exploration findings.
-8. Package the run-ready framework.
-
-Exploration should not be random. It should use the selected test cases as the route through the application, then collect selectors and assertion states for those exact flows.
+When a separate exploration workflow exists, it should use the selected test cases as the route through the application, then collect selectors and assertion states for those exact flows.
 
 ---
 

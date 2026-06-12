@@ -26,6 +26,11 @@ Use this skill for:
 - Protecting user code from accidental overwrite.
 - Reporting exactly what was pushed and how users can run it.
 
+Specialized PR skills:
+
+- Use `../GitHub_PR_Raise_Review/SKILL.md` when the user clicks Raise PR, Review PR, or Raise/Review PR.
+- Use `../GitHub_PR_Merge/SKILL.md` when the user clicks Merge Request.
+
 ---
 
 ## Inputs You May Receive

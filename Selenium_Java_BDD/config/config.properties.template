@@ -1,0 +1,22 @@
+# Quality Matrix — Selenium Java BDD Config Template
+# Copy to config/config.properties and fill values
+
+# ── Application ───────────────────────────────────────────
+BASE_URL=https://your-app.com
+ENVIRONMENT=qa
+
+# ── Browser ───────────────────────────────────────────────
+BROWSER=chrome
+HEADLESS=false
+
+# ── Timeouts (seconds) ────────────────────────────────────
+IMPLICIT_WAIT=10
+EXPLICIT_WAIT=20
+PAGE_LOAD_TIMEOUT=30
+
+# ── CI behaviour ──────────────────────────────────────────
+CI=false
+SCREENSHOT_ON_FAILURE=true
+
+# ── Reports ───────────────────────────────────────────────
+EXTENT_REPORT_PATH=reports/

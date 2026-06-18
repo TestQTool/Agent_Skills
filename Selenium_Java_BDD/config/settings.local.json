@@ -1,0 +1,12 @@
+{
+  "framework": "selenium-java-bdd",
+  "configFile": "config/config.properties",
+  "testDataFile": "utils/testdata.json",
+  "credentialsFile": "test-data/credentials.csv",
+  "reportsDir": "reports/",
+  "allureResultsDir": "allure-results/",
+  "cucumberReportsDir": "target/cucumber-reports/",
+  "defaultBrowser": "chrome",
+  "defaultTags": "@smoke",
+  "parallelThreads": 4
+}

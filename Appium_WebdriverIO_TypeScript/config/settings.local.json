@@ -1,0 +1,29 @@
+{
+  "framework": {
+    "tool": "Appium",
+    "language": "TypeScript",
+    "framework": "WebdriverIO Framework",
+    "project": "appium-webdriverio-typescript",
+    "androidCommand": "npx wdio run wdio.android.conf.ts --mochaOpts.grep @smoke",
+    "iosCommand": "npx wdio run wdio.ios.conf.ts --mochaOpts.grep @smoke"
+  },
+  "platforms": [
+    "Android",
+    "iOS"
+  ],
+  "capabilities": {
+    "Android": [
+      "platformName",
+      "automationName",
+      "deviceName",
+      "appPackage/appActivity or app"
+    ],
+    "iOS": [
+      "platformName",
+      "automationName",
+      "deviceName/udid",
+      "platformVersion",
+      "bundleId or app"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "framework": {
+    "tool": "Appium",
+    "language": "JavaScript",
+    "framework": "WebdriverIO Framework",
+    "project": "appium-webdriverio-js",
+    "androidCommand": "npx wdio run wdio.android.conf.js --mochaOpts.grep @smoke",
+    "iosCommand": "npx wdio run wdio.ios.conf.js --mochaOpts.grep @smoke"
+  },
+  "platforms": [
+    "Android",
+    "iOS"
+  ],
+  "capabilities": {
+    "Android": [
+      "platformName",
+      "automationName",
+      "deviceName",
+      "appPackage/appActivity or app"
+    ],
+    "iOS": [
+      "platformName",
+      "automationName",
+      "deviceName/udid",
+      "platformVersion",
+      "bundleId or app"
+    ]
+  }
+}

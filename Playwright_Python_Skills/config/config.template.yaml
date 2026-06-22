@@ -1,0 +1,9 @@
+# Playwright Python Framework Config Template
+
+project: playwright-python
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "pytest -m smoke --browser chromium"

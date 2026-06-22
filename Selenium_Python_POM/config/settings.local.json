@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Selenium",
+    "language": "Python",
+    "framework": "Page Object Model Framework",
+    "project": "selenium-python-pom",
+    "defaultCommand": "pytest tests/test_login.py"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

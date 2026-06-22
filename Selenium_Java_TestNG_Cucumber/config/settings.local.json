@@ -1,0 +1,19 @@
+{
+  "framework": {
+    "tool": "Selenium",
+    "language": "Java",
+    "framework": "TestNG + Cucumber BDD",
+    "runner": "Cucumber TestNG runner",
+    "project": "selenium-java-testng-cucumber",
+    "command": "mvn test -Dcucumber.filter.tags=@smoke -DsuiteXmlFile=testng.xml",
+    "iosCommand": null
+  },
+  "testng": {
+    "groups": [
+      "smoke",
+      "regression"
+    ],
+    "dataProvider": true,
+    "listeners": true
+  }
+}

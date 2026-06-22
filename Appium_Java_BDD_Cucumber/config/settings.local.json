@@ -1,0 +1,29 @@
+{
+  "framework": {
+    "tool": "Appium",
+    "language": "Java",
+    "framework": "BDD Cucumber",
+    "project": "appium-java-bdd-cucumber",
+    "androidCommand": "mvn test -Dcucumber.filter.tags=@smoke -DplatformName=Android",
+    "iosCommand": "mvn test -Dcucumber.filter.tags=@smoke -DplatformName=iOS"
+  },
+  "platforms": [
+    "Android",
+    "iOS"
+  ],
+  "capabilities": {
+    "Android": [
+      "platformName",
+      "automationName",
+      "deviceName",
+      "appPackage/appActivity or app"
+    ],
+    "iOS": [
+      "platformName",
+      "automationName",
+      "deviceName/udid",
+      "platformVersion",
+      "bundleId or app"
+    ]
+  }
+}

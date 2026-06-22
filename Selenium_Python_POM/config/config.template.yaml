@@ -1,0 +1,9 @@
+# Selenium Python Page Object Model Framework Config Template
+
+project: selenium-python-pom
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "pytest tests/test_login.py"

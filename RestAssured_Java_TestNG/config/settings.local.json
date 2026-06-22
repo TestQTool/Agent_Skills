@@ -1,0 +1,19 @@
+{
+  "framework": {
+    "tool": "RestAssured",
+    "language": "Java",
+    "framework": "TestNG Framework",
+    "runner": "TestNG",
+    "project": "restassured-java-testng",
+    "command": "mvn test -Dgroups=smoke -DsuiteXmlFile=testng.xml",
+    "iosCommand": null
+  },
+  "testng": {
+    "groups": [
+      "smoke",
+      "regression"
+    ],
+    "dataProvider": true,
+    "listeners": true
+  }
+}

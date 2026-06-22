@@ -1,0 +1,9 @@
+# Playwright JavaScript/TypeScript BDD Cucumber Framework Config Template
+
+project: playwright-bdd-cucumber
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "npx cucumber-js --tags @smoke"

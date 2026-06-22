@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Selenium",
+    "language": "Java",
+    "framework": "Page Object Model Framework",
+    "project": "selenium-java-pom",
+    "defaultCommand": "mvn test"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

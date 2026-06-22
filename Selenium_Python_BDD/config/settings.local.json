@@ -1,0 +1,12 @@
+{
+  "framework": "selenium-python-bdd",
+  "configFile": "config/config.yaml",
+  "testDataFile": "test_data/testdata.json",
+  "credentialsFile": "test_data/credentials.csv",
+  "reportsDir": "reports/",
+  "allureResultsDir": "reports/allure-results/",
+  "junitReportsDir": "reports/junit/",
+  "defaultBrowser": "chrome",
+  "defaultTags": "@smoke",
+  "parallelThreads": 4
+}

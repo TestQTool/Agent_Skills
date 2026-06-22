@@ -1,0 +1,29 @@
+{
+  "framework": {
+    "tool": "Appium",
+    "language": "Java",
+    "framework": "Hybrid Framework",
+    "project": "appium-java-hybrid",
+    "androidCommand": "mvn test -Dgroups=smoke -DplatformName=Android",
+    "iosCommand": "mvn test -Dgroups=smoke -DplatformName=iOS"
+  },
+  "platforms": [
+    "Android",
+    "iOS"
+  ],
+  "capabilities": {
+    "Android": [
+      "platformName",
+      "automationName",
+      "deviceName",
+      "appPackage/appActivity or app"
+    ],
+    "iOS": [
+      "platformName",
+      "automationName",
+      "deviceName/udid",
+      "platformVersion",
+      "bundleId or app"
+    ]
+  }
+}

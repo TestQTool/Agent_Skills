@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Playwright",
+    "language": "TypeScript",
+    "framework": "Framework",
+    "project": "playwright-typescript",
+    "defaultCommand": "npx playwright test --grep @smoke --project=Chrome"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

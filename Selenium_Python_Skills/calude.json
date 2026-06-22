@@ -1,0 +1,9 @@
+{
+  "env": {
+    "MODEL_AUTH_TOKEN": "<set-by-runtime>",
+    "MODEL_BASE_URL": "<set-by-runtime>",
+    "MODEL_NAME": "<set-by-runtime>",
+    "MODEL_SMALL_FAST_NAME": "<set-by-runtime>",
+    "DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  }
+}

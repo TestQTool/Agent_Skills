@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Selenium",
+    "language": "Java",
+    "framework": "JUnit Framework",
+    "project": "selenium-java-junit",
+    "defaultCommand": "mvn test -Dgroups=smoke"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

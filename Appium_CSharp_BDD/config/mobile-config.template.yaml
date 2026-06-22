@@ -1,0 +1,25 @@
+# Appium C# BDD Framework Mobile Config Template
+
+appium_server_url: ${APPIUM_SERVER_URL}
+platform: ${PLATFORM}
+
+android:
+  platformName: Android
+  automationName: UiAutomator2
+  deviceName: ${ANDROID_DEVICE_NAME}
+  app: ${ANDROID_APP_PATH}
+  appPackage: ${ANDROID_APP_PACKAGE}
+  appActivity: ${ANDROID_APP_ACTIVITY}
+
+ios:
+  platformName: iOS
+  automationName: XCUITest
+  deviceName: ${IOS_DEVICE_NAME}
+  platformVersion: ${IOS_PLATFORM_VERSION}
+  udid: ${IOS_UDID}
+  app: ${IOS_APP_PATH}
+  bundleId: ${IOS_BUNDLE_ID}
+
+timeouts:
+  implicit: 10
+  explicit: 30

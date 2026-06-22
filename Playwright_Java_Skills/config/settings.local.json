@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Playwright",
+    "language": "Java",
+    "framework": "Framework",
+    "project": "playwright-java",
+    "defaultCommand": "mvn test -Dgroups=smoke"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

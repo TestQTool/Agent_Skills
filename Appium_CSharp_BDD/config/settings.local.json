@@ -1,0 +1,29 @@
+{
+  "framework": {
+    "tool": "Appium",
+    "language": "C#",
+    "framework": "BDD Framework",
+    "project": "appium-csharp-bdd",
+    "androidCommand": "dotnet test --filter TestCategory=smoke -- TestRunParameters.Parameter(name=platformName,value=Android)",
+    "iosCommand": "dotnet test --filter TestCategory=smoke -- TestRunParameters.Parameter(name=platformName,value=iOS)"
+  },
+  "platforms": [
+    "Android",
+    "iOS"
+  ],
+  "capabilities": {
+    "Android": [
+      "platformName",
+      "automationName",
+      "deviceName",
+      "appPackage/appActivity or app"
+    ],
+    "iOS": [
+      "platformName",
+      "automationName",
+      "deviceName/udid",
+      "platformVersion",
+      "bundleId or app"
+    ]
+  }
+}

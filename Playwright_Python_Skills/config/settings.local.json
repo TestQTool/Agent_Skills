@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Playwright",
+    "language": "Python",
+    "framework": "Framework",
+    "project": "playwright-python",
+    "defaultCommand": "pytest -m smoke --browser chromium"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+# WebdriverIO TypeScript Framework Config Template
+
+project: webdriverio-typescript
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "npx wdio run wdio.conf.ts --mochaOpts.grep @smoke"

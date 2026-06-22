@@ -1,0 +1,9 @@
+# WebdriverIO JavaScript Framework Config Template
+
+project: webdriverio-js
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "npx wdio run wdio.conf.js --mochaOpts.grep @smoke"

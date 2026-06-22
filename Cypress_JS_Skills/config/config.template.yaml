@@ -1,0 +1,9 @@
+# Cypress JavaScript Framework Config Template
+
+project: cypress-js
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "npx cypress run --env grepTags=@smoke"

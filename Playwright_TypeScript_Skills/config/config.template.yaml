@@ -1,0 +1,9 @@
+# Playwright TypeScript Framework Config Template
+
+project: playwright-typescript
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "npx playwright test --grep @smoke --project=Chrome"

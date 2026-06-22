@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Selenium",
+    "language": "Python",
+    "framework": "PyTest Framework",
+    "project": "selenium-python-pytest",
+    "defaultCommand": "pytest -m smoke --browser chrome"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

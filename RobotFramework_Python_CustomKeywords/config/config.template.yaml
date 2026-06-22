@@ -1,0 +1,9 @@
+# Robot Framework Python Python Custom Keywords Config Template
+
+project: robotframework-python-custom-keywords
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "robot -i smoke tests"

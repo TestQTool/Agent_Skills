@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "WebdriverIO",
+    "language": "JavaScript/TypeScript",
+    "framework": "Cucumber BDD Framework",
+    "project": "webdriverio-cucumber-bdd",
+    "defaultCommand": "npx wdio run wdio.conf.ts --cucumberOpts.tags @smoke"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

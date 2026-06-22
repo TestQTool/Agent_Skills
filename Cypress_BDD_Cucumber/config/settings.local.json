@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Cypress",
+    "language": "JavaScript/TypeScript",
+    "framework": "BDD Cucumber Framework",
+    "project": "cypress-bdd-cucumber",
+    "defaultCommand": "npx cypress run --env TAGS=@smoke"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

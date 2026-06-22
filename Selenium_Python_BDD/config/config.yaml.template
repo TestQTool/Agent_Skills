@@ -1,0 +1,30 @@
+# Quality Matrix - Selenium Python BDD Config Template
+# Copy to config/config.yaml and fill values.
+
+application:
+  base_url: https://your-app.com
+  environment: qa
+
+browser:
+  name: chrome
+  headless: false
+  window_size: 1920x1080
+
+timeouts:
+  implicit_wait: 10
+  explicit_wait: 20
+  page_load_timeout: 30
+
+ci:
+  enabled: false
+  screenshot_on_failure: true
+
+reports:
+  root_dir: reports
+  allure_results_dir: reports/allure-results
+  junit_dir: reports/junit
+  screenshots_dir: reports/screenshots
+
+test_data:
+  credentials_file: test_data/credentials.csv
+  default_role: Admin

@@ -1,0 +1,29 @@
+{
+  "framework": {
+    "tool": "Appium",
+    "language": "Python",
+    "framework": "BDD Framework",
+    "project": "appium-python-bdd",
+    "androidCommand": "behave --tags=@smoke -D platformName=Android",
+    "iosCommand": "behave --tags=@smoke -D platformName=iOS"
+  },
+  "platforms": [
+    "Android",
+    "iOS"
+  ],
+  "capabilities": {
+    "Android": [
+      "platformName",
+      "automationName",
+      "deviceName",
+      "appPackage/appActivity or app"
+    ],
+    "iOS": [
+      "platformName",
+      "automationName",
+      "deviceName/udid",
+      "platformVersion",
+      "bundleId or app"
+    ]
+  }
+}

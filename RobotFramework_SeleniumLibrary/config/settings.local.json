@@ -1,0 +1,21 @@
+{
+  "framework": {
+    "tool": "Robot Framework",
+    "language": "Robot",
+    "framework": "Selenium Library",
+    "project": "robotframework-seleniumlibrary",
+    "defaultCommand": "robot -i smoke tests"
+  },
+  "permissions": {
+    "allow": [
+      "Write(test-cases/**)",
+      "Write(pageObjects/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(features/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  }
+}

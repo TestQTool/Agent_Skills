@@ -1,0 +1,9 @@
+# Robot Framework Robot Selenium Library Config Template
+
+project: robotframework-seleniumlibrary
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "robot -i smoke tests"

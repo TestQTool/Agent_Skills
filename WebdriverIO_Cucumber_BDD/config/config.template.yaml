@@ -1,0 +1,9 @@
+# WebdriverIO JavaScript/TypeScript Cucumber BDD Framework Config Template
+
+project: webdriverio-cucumber-bdd
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "npx wdio run wdio.conf.ts --cucumberOpts.tags @smoke"

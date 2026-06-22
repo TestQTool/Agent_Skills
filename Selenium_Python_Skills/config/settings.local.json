@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pytest:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(python -m venv:*)",
+      "Write(test-cases/**)",
+      "Write(page_objects/**)",
+      "Write(pages/**)",
+      "Write(tests/**)",
+      "Write(config/**)",
+      "Write(reports/**)"
+    ]
+  },
+  "framework": {
+    "name": "selenium-python",
+    "language": "Python",
+    "runner": "pytest",
+    "pattern": "Hybrid POM",
+    "defaultBrowser": "chrome",
+    "defaultTags": "smoke"
+  }
+}

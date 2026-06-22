@@ -1,0 +1,9 @@
+# Selenium Python Behave Framework Config Template
+
+project: selenium-python-behave
+base_url: ${BASE_URL}
+browser: chrome
+headless: false
+default_role: Admin
+default_suite: smoke
+run_command: "behave --tags=@smoke"

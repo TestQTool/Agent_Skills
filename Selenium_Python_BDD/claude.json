@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "framework": "Selenium Python BDD Cucumber",
+  "language": "Python 3.10+",
+  "buildTool": "pip/venv",
+  "testRunner": "Behave with Gherkin feature files",
+  "staticFrameworkRepo": "https://github.com/TestQTool/StaticFrameworks",
+  "staticFrameworkPath": "Web Automation/selenium-python-bdd",
+  "agentSkillsRepo": "https://github.com/TestQTool/Agent_Skills",
+  "skillsPath": "Selenium_Python_BDD",
+  "entryPoint": "CLAUDE.md",
+  "skills": [
+    "explore/SKILL.md",
+    "generate-tests/SKILL.md",
+    "build-scripts/SKILL.md",
+    "heal/SKILL.md",
+    "review/SKILL.md"
+  ],
+  "generatedFilePaths": {
+    "pageObjects": "page_objects/",
+    "pages": "pages/",
+    "stepDefs": "features/steps/",
+    "features": "features/"
+  },
+  "frameworkFiles": {
+    "doNotModify": [
+      "core/base_page.py",
+      "core/driver_factory.py",
+      "framework/base_page.py",
+      "framework/driver_factory.py",
+      "features/environment.py",
+      "conftest.py",
+      "behave.ini",
+      "pytest.ini",
+      "utils/web_actions.py",
+      "utils/reporting.py",
+      "utils/scenario_context.py"
+    ]
+  }
+}

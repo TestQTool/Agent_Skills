@@ -93,6 +93,41 @@ Block or require human approval when:
 
 ---
 
+## Conflict-Aware Review Rules
+
+Review must be honest and conservative.
+
+When GitHub reports:
+
+- `mergeable=false`
+- `mergeable_state=dirty`
+- conflict messages in the PR body/status
+- no changed files
+- source branch equals target branch
+
+then review must return `mergeDecision=blocked` or `pending`; it must not return `ready`.
+
+For conflicted PRs:
+
+- Do not mark the PR as reviewed/approved for merge.
+- Do not show a success message.
+- Return warnings that clearly say GitHub reports merge conflicts.
+- Return next actions telling the user to click **Merge to Target** only if the merge skill is configured to run AI conflict resolution, or to resolve manually in GitHub.
+- Do not attempt to merge from this skill.
+
+If GitHub has not calculated mergeability yet:
+
+- Return `mergeDecision=pending`.
+- Ask the UI/agent to retry review after a short wait.
+
+If changed files are empty:
+
+- Return `mergeDecision=blocked`.
+- Warn that no files were pushed for the current run.
+- Do not reuse stale PR state as a successful current run.
+
+---
+
 ## Response Contract
 
 ```json
@@ -122,5 +157,7 @@ Block or require human approval when:
 - Do not create duplicate PRs for the same source and target branch.
 - Do not approve merge if GitHub reports conflicts.
 - Do not hide warnings from the UI.
+- Do not treat an old open PR as a successful current push when no files were pushed in the current run.
+- Do not mark a conflicted PR as reviewed/ready.
 - Do not merge from this skill; use `github-pr-merge` for merge requests.
 - Always report PR number, URL, source branch, target branch, changed files, and merge decision.

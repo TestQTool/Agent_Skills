@@ -274,6 +274,36 @@ When a conflict is detected:
 5. For wiring files, merge both sides carefully.
 6. If conflict intent is ambiguous, return a conflict report instead of guessing.
 
+Backend AI-resolution flow:
+
+1. Confirm Git is executable on the runtime host. If a configured absolute Git path is invalid for the OS, use `git` from `PATH`.
+2. Fetch source and target branches from origin.
+3. Checkout/reset local source branch to `origin/<sourceBranch>`.
+4. Attempt a normal merge from `origin/<targetBranch>` into the source branch.
+5. If conflict files exist, resolve only those conflicted files with AI.
+6. AI receives the complete conflicted file content with markers and must output complete resolved file content only.
+7. Backend validates that conflict markers are gone before staging.
+8. Backend commits with a deterministic conflict-resolution message and pushes the source branch.
+9. Backend rechecks PR mergeability before allowing merge.
+
+Do not use `-X ours` or `-X theirs` as the default merge conflict strategy. Those options may discard user or target branch changes. Use them only if a future explicit policy says a file category is safely generated-only and disposable.
+
+AI conflict resolution must preserve:
+
+- user-owned custom code by default
+- target branch updates that do not conflict with generated automation changes
+- latest generated tests/pages/steps when the file is clearly generated
+- framework wiring from both sides for `pom.xml`, `package.json`, suite XML, config files, fixtures, listeners, and CI files
+
+AI conflict resolution must reject:
+
+- output containing conflict markers
+- blank output
+- secrets, tokens, API keys, local machine paths, backend paths, or prompt/skill files
+- unrelated files outside the selected framework root
+
+If AI cannot safely resolve a file, return `merge_blocked` with a conflict report. Never report a merge success unless GitHub confirms the merge.
+
 Conflict report format:
 
 ```json
@@ -321,6 +351,8 @@ Return structured output whenever possible:
 - Never overwrite unrelated user files.
 - Never commit secrets.
 - Never silently merge conflicts.
+- Never report stale PRs as the current run when the current push produced zero files.
+- Never mark conflict review/merge as successful unless the PR is actually clean or GitHub merge API confirms success.
 - Never direct-merge to protected or production branches without approval.
 - Never rely on hardcoded backend commit messages when context is available.
 - Always report what changed, which branch was used, whether pull/sync context was used, and how to run it.

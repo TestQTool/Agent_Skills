@@ -1,0 +1,24 @@
+{
+  "framework": {
+    "tool": "Karate",
+    "language": "Java",
+    "framework": "Karate DSL + JUnit/TestNG runner",
+    "project": "karate-java",
+    "command": "mvn test -Dkarate.options=\"--tags @smoke\""
+  },
+  "api": {
+    "authModes": [
+      "Bearer",
+      "Basic",
+      "OAuth2",
+      "API key"
+    ],
+    "suites": [
+      "smoke",
+      "regression",
+      "contract",
+      "security",
+      "performance"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+# pytest + requests Python API Automation Config Template
+base_url: ${BASE_URL}
+environment: qa
+auth:
+  type: ${AUTH_TYPE}
+  token: ${API_TOKEN}
+timeouts:
+  connect: 10
+  read: 30
+reports:
+  dir: reports

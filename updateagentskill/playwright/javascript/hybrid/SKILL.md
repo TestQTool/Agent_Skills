@@ -17,7 +17,9 @@ Require:
 - Application routes and safe runtime data references required by those steps.
 - Selector evidence when production-ready output is requested.
 
-Reject plaintext credentials, tokens, cookies, and other secrets. Accept secret references such as `HR_ADMIN`, `TEST_USERNAME`, or a CI secret name.
+Use only data that is present in the selected approved test cases. Do not invent URLs, users, passwords, tags, or roles.
+When approved test-case steps contain an application URL or credential value, move those values into the generated root `.env` file and consume them through environment variables. Do not hardcode those values in tests, page classes, locators, comments, or step titles.
+Reject tokens, cookies, private keys, and platform secrets. Accept test-environment credentials only when they are explicitly present in the approved test case, and store them only in `.env`.
 
 Do not load or invoke a test-case-generation skill. Do not create, expand, merge, split, reprioritize, or supplement test cases.
 
@@ -32,6 +34,7 @@ web-automation/playwright/javascript/hybrid
 Generate feature files only:
 
 ```text
+.env
 page-objects/<feature>.locators.js
 pages/<Feature>Page.js
 tests/<feature>.test.js
@@ -56,7 +59,8 @@ Never regenerate or replace framework-owned configuration, `core`, utilities, va
 6. If selector evidence is missing, infer only readable selectors and return `needs_exploration`.
 7. Generate exactly one Playwright test for each selected test-case ID.
 8. Reuse existing files and fixtures without removing unrelated content.
-9. Return deterministic JSON operations and complete step coverage.
+9. Write approved runtime URL/credential values to `.env`, then read them through `process.env`.
+10. Return deterministic JSON operations and complete step coverage.
 
 Technical navigation required to execute an approved action may be implemented inside a page method. Record it in coverage with `technical: true`; do not turn it into a new business scenario or expectation.
 
@@ -91,7 +95,9 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 - Register page classes in the existing `fixtures/test.js` using lower-camel-case names.
 - Import `test` only from `../fixtures/test.js`.
 - Include the exact approved ID and title in the test name.
-- Include only approved suite tags.
+- Include only approved testcase tags as Playwright `@tags` in the test title.
+- Preserve tag meaning and use values from the testcase `tags` field only. Example: testcase tag `Regression` becomes `@Regression`.
+- Do not invent `@smoke`, `@regression`, or any other tag when it is not present in the selected testcase.
 - Wrap every approved action and expected result in `test.step()`.
 - Call page methods from tests; do not use raw selectors in tests.
 - Use `expect(locator).toBeVisible()`, `toHaveText()`, `toContainText()`, `toHaveValue()`, `toHaveURL()`, or another retrying assertion.
@@ -100,10 +106,13 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 
 ## Configuration and security
 
-- Read the application host from `BASE_URL`.
-- Use relative paths in executable navigation.
-- Resolve credentials and tokens at runtime from environment or a secret provider.
-- Never put a full environment URL or secret value in source, test titles, step titles, test data, notes, logs, or output JSON.
+- Create or update the root `.env` file when approved testcase data contains a URL, username, password, or role.
+- Store application URL in `BASE_URL`.
+- Store credentials in `TEST_USERNAME` and `TEST_PASSWORD` unless the testcase clearly requires a role-specific prefix.
+- Read the application host from `process.env.BASE_URL` through the framework environment helper.
+- Read credentials from `process.env.TEST_USERNAME` and `process.env.TEST_PASSWORD`, or through `utils/secrets.js`.
+- Use relative paths in executable navigation after `BASE_URL` is configured.
+- Never put a full environment URL, username, password, or secret value in `.test.js`, `pages/*.js`, `page-objects/*.js`, test titles, step titles, notes, logs, or comments.
 - Never emit local absolute paths, backend paths, prompt-repository paths, or GitHub tokens.
 
 ## Output contract
@@ -131,6 +140,8 @@ Allowed operations:
 - `registerFixture`: add one missing fixture import and entry without returning the complete fixture file.
 - `addPackageScript`: add one missing script without returning the complete package file.
 
+Generated `.env` is allowed as a `createFile` or `replaceGeneratedFile` operation when it contains only approved testcase runtime values.
+
 Do not delete files. Do not return a complete `fixtures/test.js` or `package.json` for merge operations.
 
 For every approved step, coverage must contain `testCaseId`, `stepNumber`, `actionMethod`, `assertionMethod`, and `selectorStatus`. Map every selected step exactly once.
@@ -146,7 +157,7 @@ Return `ready` only when:
 5. All generated paths remain inside the Hybrid framework root.
 6. JavaScript parses and imports resolve.
 7. Fixture names match test destructuring.
-8. No secret, full URL, local path, backend path, or prompt path is present.
+8. URLs and credentials from approved testcase data are present only in `.env`; generated JS files read environment variables.
 9. No fixed waits or immediate boolean visibility assertions are used.
 10. `npm run validate` and `npm run test:list` succeed after applying operations.
 

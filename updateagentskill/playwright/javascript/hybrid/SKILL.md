@@ -35,8 +35,7 @@ Generate feature files only:
 
 ```text
 .env
-page-objects/<feature>.locators.js
-pages/<Feature>Page.js
+pageObjects/<Feature>Page.js
 tests/<feature>.test.js
 ```
 
@@ -53,8 +52,8 @@ Never regenerate or replace framework-owned configuration, `core`, utilities, va
 
 1. Validate the selected IDs and required step fields.
 2. Inspect existing feature files before generating operations.
-3. Map every approved action to one page method.
-4. Map every approved expected result to a Playwright web-first assertion.
+3. Map every approved action to one page method in `pageObjects/<Feature>Page.js`.
+4. Map every approved expected result to a Playwright web-first assertion in the same page object.
 5. Use verified selector evidence as the primary selector source.
 6. If selector evidence is missing, infer only readable selectors and return `needs_exploration`.
 7. Generate exactly one Playwright test for each selected test-case ID.
@@ -64,14 +63,25 @@ Never regenerate or replace framework-owned configuration, `core`, utilities, va
 
 Technical navigation required to execute an approved action may be implemented inside a page method. Record it in coverage with `technical: true`; do not turn it into a new business scenario or expectation.
 
-## Locator rules
+## Page object rules
 
-Keep locators only in `page-objects/*.locators.js` as factory functions:
+Keep locators/selectors and page actions/assertions together in one page object file:
 
 ```js
-export const vacancyLocators = Object.freeze({
-  saveButton: (page) => page.getByRole('button', { name: 'Save' })
-});
+export default class LoginPage {
+  constructor(page) {
+    this.page = page;
+    this.usernameInput = page.getByRole('textbox', { name: 'Username' });
+    this.passwordInput = page.getByLabel('Password');
+    this.loginButton = page.getByRole('button', { name: 'Log In' });
+  }
+
+  async login(username, password) {
+    await this.usernameInput.fill(username);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+  }
+}
 ```
 
 Prefer selectors in this order:
@@ -90,10 +100,12 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 
 - Use JavaScript ESM.
 - Extend `core/BasePage.js` in page classes.
-- Put business actions and assertions in `pages/*.js`.
+- Put selectors, business actions, and assertions in `pageObjects/*.js`.
 - Use one meaningful action or assertion per page method.
 - Register page classes in the existing `fixtures/test.js` using lower-camel-case names.
 - Import `test` only from `../fixtures/test.js`.
+- Import page classes in tests from `../pageObjects/<Feature>Page.js`.
+- Do not create `page-objects/*.locators.js` or `pages/<Feature>Page.js`.
 - Include the exact approved ID and title in the test name.
 - Include only approved testcase tags as Playwright `@tags` in the test title.
 - Preserve tag meaning and use values from the testcase `tags` field only. Example: testcase tag `Regression` becomes `@Regression`.
@@ -112,7 +124,7 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 - Read the application host from `process.env.BASE_URL` through the framework environment helper.
 - Read credentials from `process.env.TEST_USERNAME` and `process.env.TEST_PASSWORD`, or through `utils/secrets.js`.
 - Use relative paths in executable navigation after `BASE_URL` is configured.
-- Never put a full environment URL, username, password, or secret value in `.test.js`, `pages/*.js`, `page-objects/*.js`, test titles, step titles, notes, logs, or comments.
+- Never put a full environment URL, username, password, or secret value in `.test.js`, `pageObjects/*.js`, test titles, step titles, notes, logs, or comments.
 - Never emit local absolute paths, backend paths, prompt-repository paths, or GitHub tokens.
 
 ## Output contract

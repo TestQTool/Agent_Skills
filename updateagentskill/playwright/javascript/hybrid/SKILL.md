@@ -110,6 +110,9 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 - Include only approved testcase tags as Playwright `@tags` in the test title.
 - Preserve tag meaning and use values from the testcase `tags` field only. Example: testcase tag `Regression` becomes `@Regression`.
 - Do not invent `@smoke`, `@regression`, or any other tag when it is not present in the selected testcase.
+- Do not convert `priority`, `type`, `category`, `status`, requirement IDs, or any other metadata field into Playwright `@tags`.
+- Examples: `Priority: 2-Medium` must not become `@2-Medium`; `Type: Functional` must not become `@Functional`; `Category: Negative` must not become `@Negative`.
+- Keep priority/type/category as `test.info().annotations`, comments, or report metadata only.
 - Wrap every approved action and expected result in `test.step()`.
 - Call page methods from tests; do not use raw selectors in tests.
 - Use `expect(locator).toBeVisible()`, `toHaveText()`, `toContainText()`, `toHaveValue()`, `toHaveURL()`, or another retrying assertion.

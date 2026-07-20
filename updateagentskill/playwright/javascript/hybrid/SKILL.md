@@ -39,6 +39,15 @@ pageObjects/<Feature>Page.js
 tests/<feature>.test.js
 ```
 
+For every selected runnable test case, the response must include generator-owned operations for both:
+
+```text
+pageObjects/<Feature>Page.js
+tests/<feature>.test.js
+```
+
+Do not return only `.env`, only a page object, only coverage, or an empty operations list when selected testcase steps are present. If selectors are uncertain, still generate the page object and test with best-effort accessible selectors and mark the selector status as `needs_exploration` in coverage/warnings.
+
 Update only when needed:
 
 ```text
@@ -55,7 +64,7 @@ Never regenerate or replace framework-owned configuration, `core`, utilities, va
 3. Map every approved action to one page method in `pageObjects/<Feature>Page.js`.
 4. Map every approved expected result to a Playwright web-first assertion in the same page object.
 5. Use verified selector evidence as the primary selector source.
-6. If selector evidence is missing, infer only readable selectors and return `needs_exploration`.
+6. If selector evidence is missing, infer only readable selectors, still return runnable feature files, and mark the response `needs_exploration`.
 7. Generate exactly one Playwright test for each selected test-case ID.
 8. Reuse existing files and fixtures without removing unrelated content.
 9. Write approved runtime URL/credential values to `.env`, then read them through `process.env`.
@@ -151,6 +160,17 @@ Return strict JSON only:
 }
 ```
 
+For runnable UI test cases, `operations` must contain at minimum:
+
+```json
+[
+  { "type": "createFile", "path": "pageObjects/<Feature>Page.js", "content": "..." },
+  { "type": "createFile", "path": "tests/<feature>.test.js", "content": "..." }
+]
+```
+
+Include `.env` as a generated operation when selected testcase data contains an approved URL, username, password, or role. The `.env` operation does not replace the required page object and test operations.
+
 Allowed operations:
 
 - `createFile`: create a missing feature file.
@@ -179,5 +199,5 @@ Return `ready` only when:
 9. No fixed waits or immediate boolean visibility assertions are used.
 10. `npm run validate` and `npm run test:list` succeed after applying operations.
 
-Return `needs_exploration` when behavior is complete but selectors or assertion states are unverified. Return `blocked` when required approved steps, expectations, routes, safe data references, or framework files are missing.
+Return `needs_exploration` when behavior is complete but selectors or assertion states are unverified; this response must still include runnable `pageObjects/*.js` and `tests/*.test.js` operations. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
 

@@ -23,6 +23,15 @@ Reject tokens, cookies, private keys, and platform secrets. Accept test-environm
 
 Runtime data rule is mandatory: if a testcase step says `Navigate to url "https://..."`, `Enter username "..."`, or `password "..."`, those literal values must appear only in `.env` and never in any generated `.js` file. Generated tests and page objects must read them from `process.env.BASE_URL`, `process.env.TEST_USERNAME`, and `process.env.TEST_PASSWORD` or framework helpers that expose those environment values.
 
+Data placement rule is mandatory:
+
+- `.env` is only for the application base URL and approved valid/default runtime credentials used to access the application.
+- Put the approved application URL in `BASE_URL`.
+- Put valid/default login credentials in `TEST_USERNAME` and `TEST_PASSWORD`.
+- Put invalid usernames, invalid passwords, alternate users, form input values, expected messages, search text, and other testcase-specific data in `test-data/testdata.json` or `test-data/credentials.csv`.
+- Negative tests must not overwrite `.env` valid credentials with invalid values. They should read invalid values from test data.
+- Generated JavaScript may reference keys such as `process.env.BASE_URL` or `testData.invalidUsername`, but must not contain the literal values from testcase steps.
+
 Do not load or invoke a test-case-generation skill. Do not create, expand, merge, split, reprioritize, or supplement test cases.
 
 ## Target framework contract
@@ -135,15 +144,17 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 ## Configuration and security
 
 - Create or update the root `.env` file when approved testcase data contains a URL, username, password, or role.
-- Store application URL in `BASE_URL`.
-- Store credentials in `TEST_USERNAME` and `TEST_PASSWORD` unless the testcase clearly requires a role-specific prefix.
+- Store the application URL in `BASE_URL`.
+- Store only valid/default credentials in `TEST_USERNAME` and `TEST_PASSWORD` unless the testcase clearly requires a role-specific prefix.
+- Store invalid credentials and all other testcase-specific input data in `test-data/testdata.json` or `test-data/credentials.csv`, not in `.env`.
 - Read the application host from `process.env.BASE_URL` through the framework environment helper.
 - Read credentials from `process.env.TEST_USERNAME` and `process.env.TEST_PASSWORD`, or through `utils/secrets.js`.
+- For negative login scenarios, read invalid username/password from test data and keep `.env` credentials valid/default.
 - In `tests/*.test.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Assign variables only from environment helpers or `process.env`, for example `const username = process.env.TEST_USERNAME;`.
 - In `pageObjects/*.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Methods should accept values as parameters or read safe framework environment helpers.
 - Do not use literal fallbacks such as `process.env.TEST_PASSWORD || 'demo'`; missing runtime data should fail clearly or be supplied through `.env`.
 - Use relative paths in executable navigation after `BASE_URL` is configured.
-- Never put a full environment URL, username, password, or secret value in `.test.js`, `pageObjects/*.js`, test titles, step titles, notes, logs, or comments.
+- Never put a full environment URL, username, password, or secret value in `.test.js`, `pageObjects/*.js`, test titles, step titles, notes, logs, or comments. Do not turn hidden values into visible text such as `Navigate to url process.env.BASE_URL`; use natural safe labels such as `Navigate to login page`.
 - Never emit local absolute paths, backend paths, prompt-repository paths, or GitHub tokens.
 
 Bad generated test examples:
@@ -161,6 +172,13 @@ const username = process.env.TEST_USERNAME;
 const password = process.env.TEST_PASSWORD;
 await loginPage.open(process.env.BASE_URL);
 await loginPage.login(username, password);
+```
+
+Good negative-data example:
+
+```js
+const { invalidUsername, invalidPassword } = testData.login.invalidCredentials;
+await loginPage.login(invalidUsername, invalidPassword);
 ```
 
 ## Output contract
@@ -190,7 +208,7 @@ For runnable UI test cases, `operations` must contain at minimum:
 ]
 ```
 
-Include `.env` as a generated operation when selected testcase data contains an approved URL, username, password, or role. The `.env` operation does not replace the required page object and test operations.
+Include `.env` as a generated operation when selected testcase data contains an approved URL, valid/default username, valid/default password, or role. The `.env` operation does not replace the required page object and test operations. Include `test-data/testdata.json` or `test-data/credentials.csv` when testcase-specific or negative data is needed.
 
 Allowed operations:
 
@@ -199,7 +217,7 @@ Allowed operations:
 - `registerFixture`: add one missing fixture import and entry without returning the complete fixture file.
 - `addPackageScript`: add one missing script without returning the complete package file.
 
-Generated `.env` is allowed as a `createFile` or `replaceGeneratedFile` operation when it contains only approved testcase runtime values.
+Generated `.env` is allowed as a `createFile` or `replaceGeneratedFile` operation when it contains only approved base URL and valid/default runtime credentials. Generated test-data files are allowed for invalid credentials and testcase-specific inputs.
 
 Do not delete files. Do not return a complete `fixtures/test.js` or `package.json` for merge operations.
 

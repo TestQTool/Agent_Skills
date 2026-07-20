@@ -21,6 +21,8 @@ Use only data that is present in the selected approved test cases. Do not invent
 When approved test-case steps contain an application URL or credential value, move those values into the generated root `.env` file and consume them through environment variables. Do not hardcode those values in tests, page classes, locators, comments, or step titles.
 Reject tokens, cookies, private keys, and platform secrets. Accept test-environment credentials only when they are explicitly present in the approved test case, and store them only in `.env`.
 
+Runtime data rule is mandatory: if a testcase step says `Navigate to url "https://..."`, `Enter username "..."`, or `password "..."`, those literal values must appear only in `.env` and never in any generated `.js` file. Generated tests and page objects must read them from `process.env.BASE_URL`, `process.env.TEST_USERNAME`, and `process.env.TEST_PASSWORD` or framework helpers that expose those environment values.
+
 Do not load or invoke a test-case-generation skill. Do not create, expand, merge, split, reprioritize, or supplement test cases.
 
 ## Target framework contract
@@ -137,10 +139,29 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 - Store credentials in `TEST_USERNAME` and `TEST_PASSWORD` unless the testcase clearly requires a role-specific prefix.
 - Read the application host from `process.env.BASE_URL` through the framework environment helper.
 - Read credentials from `process.env.TEST_USERNAME` and `process.env.TEST_PASSWORD`, or through `utils/secrets.js`.
+- In `tests/*.test.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Assign variables only from environment helpers or `process.env`, for example `const username = process.env.TEST_USERNAME;`.
+- In `pageObjects/*.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Methods should accept values as parameters or read safe framework environment helpers.
 - Do not use literal fallbacks such as `process.env.TEST_PASSWORD || 'demo'`; missing runtime data should fail clearly or be supplied through `.env`.
 - Use relative paths in executable navigation after `BASE_URL` is configured.
 - Never put a full environment URL, username, password, or secret value in `.test.js`, `pageObjects/*.js`, test titles, step titles, notes, logs, or comments.
 - Never emit local absolute paths, backend paths, prompt-repository paths, or GitHub tokens.
+
+Bad generated test examples:
+
+```js
+await loginPage.open('https://school.moodledemo.net/login/index.php');
+await loginPage.login('student', 'moodle26');
+const password = process.env.TEST_PASSWORD || 'moodle26';
+```
+
+Good generated test examples:
+
+```js
+const username = process.env.TEST_USERNAME;
+const password = process.env.TEST_PASSWORD;
+await loginPage.open(process.env.BASE_URL);
+await loginPage.login(username, password);
+```
 
 ## Output contract
 

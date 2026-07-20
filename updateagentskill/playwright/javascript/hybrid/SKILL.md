@@ -181,6 +181,35 @@ const { invalidUsername, invalidPassword } = testData.login.invalidCredentials;
 await loginPage.login(invalidUsername, invalidPassword);
 ```
 
+## Test-data consistency
+
+- If a generated test imports `test-data/testdata.json`, every referenced object path must exist in the same generated or updated `test-data/testdata.json` file.
+- Do not reference `testData.login`, `testData.credentials`, `testData.<feature>.<name>`, or any nested key unless that exact object path is present in the returned test-data operation.
+- For each generation, `test-data/testdata.json` and `test-data/credentials.csv` must represent the selected testcase IDs only. Do not preserve stale testcase IDs, stale credentials, stale URLs, or stale rows from previous generations unless those IDs are also selected in the current request.
+- If an existing test-data file is reused, merge only the selected testcase data needed by the generated tests and remove or replace stale generator-owned data for the same feature.
+- Empty-field scenarios must use an explicit test-data object instead of assuming an object exists.
+
+Example: if a test contains:
+
+```js
+const { emptyCredentials } = testData.login;
+```
+
+then `test-data/testdata.json` must contain:
+
+```json
+{
+  "login": {
+    "emptyCredentials": {
+      "username": "",
+      "password": ""
+    }
+  }
+}
+```
+
+Prefer direct, small feature data objects for generated tests. Do not make tests destructure from the original raw testcase metadata unless that raw metadata shape is intentionally generated and exactly matches the test code.
+
 ## Output contract
 
 Return strict JSON only:
@@ -217,7 +246,7 @@ Allowed operations:
 - `registerFixture`: add one missing fixture import and entry without returning the complete fixture file.
 - `addPackageScript`: add one missing script without returning the complete package file.
 
-Generated `.env` is allowed as a `createFile` or `replaceGeneratedFile` operation when it contains only approved base URL and valid/default runtime credentials. Generated test-data files are allowed for invalid credentials and testcase-specific inputs.
+Generated `.env` is allowed as a `createFile` or `replaceGeneratedFile` operation when it contains only approved base URL and valid/default runtime credentials. Generated test-data files are required when tests reference test-data keys and are allowed for invalid credentials and testcase-specific inputs.
 
 Do not delete files. Do not return a complete `fixtures/test.js` or `package.json` for merge operations.
 
@@ -235,8 +264,10 @@ Return `ready` only when:
 6. JavaScript parses and imports resolve.
 7. Fixture names match test destructuring.
 8. URLs and credentials from approved testcase data are present only in `.env`; generated JS files read environment variables.
-9. No fixed waits or immediate boolean visibility assertions are used.
-10. `npm run validate` and `npm run test:list` succeed after applying operations.
+9. Every `testData` object path referenced by generated tests exists in the generated or updated `test-data/testdata.json`.
+10. Generated test-data files contain selected testcase IDs/data only and do not carry stale unrelated testcase rows.
+11. No fixed waits or immediate boolean visibility assertions are used.
+12. `npm run validate` and `npm run test:list` succeed after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors or assertion states are unverified; this response must still include runnable `pageObjects/*.js` and `tests/*.test.js` operations. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
 

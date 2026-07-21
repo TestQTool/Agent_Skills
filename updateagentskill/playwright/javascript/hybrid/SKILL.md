@@ -1,4 +1,4 @@
----
+﻿---
 name: hybrid
 description: Generate Playwright JavaScript Hybrid automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation that must create locator modules, page classes, fixtures, and Playwright tests compatible with the matching Hybrid static framework; never use this skill to create test cases or invent business scenarios.
 ---
@@ -7,8 +7,12 @@ description: Generate Playwright JavaScript Hybrid automation from explicitly se
 
 Generate feature-specific automation for the Playwright JavaScript Hybrid framework. Treat selected approved test cases as the only behavioral source of truth.
 
-## Required input
 
+## Run automation healing
+
+For Playwright JavaScript Hybrid run-failure repair, use the sibling `HEALING.md` file in this directory. Keep generation rules in this `SKILL.md`; keep run-time repair, failure classification, rerun, and push-after-pass policy in `HEALING.md`.
+
+## Required input
 Require:
 
 - Framework version and existing target-repository files.
@@ -306,4 +310,7 @@ Return `ready` only when:
 12. `npm run validate` and `npm run test:list` succeed after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors or assertion states are unverified; this response must still include runnable `pageObjects/*.js` and `tests/*.test.js` operations. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
+
+
+
 

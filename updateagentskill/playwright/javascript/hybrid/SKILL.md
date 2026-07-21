@@ -16,6 +16,7 @@ Require:
 - Every step containing `number`, `action`, and `expected`.
 - Application routes and safe runtime data references required by those steps.
 - Selector evidence when production-ready output is requested.
+- Selector evidence from live application inspection when the backend provides it.
 
 Use only data that is present in the selected approved test cases. Do not invent URLs, users, passwords, tags, or roles.
 When approved test-case steps contain an application URL or credential value, move those values into the generated root `.env` file and consume them through environment variables. Do not hardcode those values in tests, page classes, locators, comments, or step titles.
@@ -75,11 +76,12 @@ Never regenerate or replace framework-owned configuration, `core`, utilities, va
 3. Map every approved action to one page method in `pageObjects/<Feature>Page.js`.
 4. Map every approved expected result to a Playwright web-first assertion in the same page object.
 5. Use verified selector evidence as the primary selector source.
-6. If selector evidence is missing, infer only readable selectors, still return runnable feature files, and mark the response `needs_exploration`.
-7. Generate exactly one Playwright test for each selected test-case ID.
-8. Reuse existing files and fixtures without removing unrelated content.
-9. Write approved runtime URL/credential values to `.env`, then read them through `process.env`.
-10. Return deterministic JSON operations and complete step coverage.
+6. If live selector evidence is present, choose selectors from that evidence before using testcase wording. Prefer stable `id`, `name`, `data-testid`, role/name, placeholder, visible label, and button/link text from the evidence.
+7. If selector evidence is missing or incomplete, infer only readable selectors, still return runnable feature files, and mark the response `needs_exploration`.
+8. Generate exactly one Playwright test for each selected test-case ID.
+9. Reuse existing files and fixtures without removing unrelated content.
+10. Write approved runtime URL/credential values to `.env`, then read them through `process.env`.
+11. Return deterministic JSON operations and complete step coverage.
 
 Technical navigation required to execute an approved action may be implemented inside a page method. Record it in coverage with `technical: true`; do not turn it into a new business scenario or expectation.
 
@@ -106,15 +108,25 @@ export default class LoginPage {
 
 Prefer selectors in this order:
 
-1. `getByRole` with accessible name.
-2. `getByLabel`.
-3. `getByPlaceholder`.
-4. `getByTestId`.
+1. Stable selector evidence: `id`, `name`, `data-testid`, `data-test`, or `data-qa` from live inspection.
+2. `getByRole` with accessible name from live inspection.
+3. `getByLabel` when the evidence confirms a matching label.
+4. `getByPlaceholder` when the evidence confirms a matching placeholder.
 5. Stable semantic attributes.
 6. Scoped stable CSS.
 7. Readable relationship XPath.
 
 Do not use absolute XPath, blind positional selectors, generated classes, or selectors copied without evidence.
+
+When live evidence contains a stable `id` or `name`, prefer it over a guessed label. Example: if evidence shows an input `{ "id": "username", "name": "username" }`, use `page.locator('#username')` or `page.locator('input[name="username"]')`; do not guess `page.getByLabel('Username')` unless the evidence confirms that label.
+
+For important actions such as login, generate a resilient locator strategy in the page object when evidence gives multiple stable candidates:
+
+```js
+this.usernameInput = page.locator('#username').or(page.locator('input[name="username"]'));
+```
+
+Use fallback chains only from stable evidence or readable user-facing attributes. Do not chain random selectors.
 
 ## Page and test rules
 

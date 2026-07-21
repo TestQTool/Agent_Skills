@@ -35,21 +35,43 @@ Data placement rule is mandatory:
 
 Do not load or invoke a test-case-generation skill. Do not create, expand, merge, split, reprioritize, or supplement test cases.
 
-## Target framework contract
+## Target output contract
 
-Target framework root:
+The static framework path is reference context only. Do not use the reference repository path as a generated output path.
+
+Reference framework path:
 
 ```text
 web-automation/playwright/javascript/hybrid
 ```
 
-Generate feature files only:
+Generated files must target the selected client framework root from the request, usually:
+
+```text
+updatedplaywrightjshybrid
+```
+
+Return operation paths either relative to that selected root or prefixed with that selected root:
 
 ```text
 .env
+test-data/testdata.json
+test-data/credentials.csv
 pageObjects/<Feature>Page.js
 tests/<feature>.test.js
 ```
+
+or:
+
+```text
+updatedplaywrightjshybrid/.env
+updatedplaywrightjshybrid/test-data/testdata.json
+updatedplaywrightjshybrid/test-data/credentials.csv
+updatedplaywrightjshybrid/pageObjects/<Feature>Page.js
+updatedplaywrightjshybrid/tests/<feature>.test.js
+```
+
+Never return generated paths beginning with `web-automation/`, `updatewebautomation/`, `playwright/javascript/hybrid/`, `Agent_Skills/`, or `StaticFrameworks/`.
 
 For every selected runnable test case, the response must include generator-owned operations for both:
 
@@ -249,6 +271,8 @@ For runnable UI test cases, `operations` must contain at minimum:
 ]
 ```
 
+Operation paths must use relative paths or the selected client root. They must not use the reference framework path.
+
 Include `.env` as a generated operation when selected testcase data contains an approved URL, valid/default username, valid/default password, or role. The `.env` operation does not replace the required page object and test operations. Include `test-data/testdata.json` or `test-data/credentials.csv` when testcase-specific or negative data is needed.
 
 Allowed operations:
@@ -272,7 +296,7 @@ Return `ready` only when:
 2. Exactly one generated test maps to each selected ID.
 3. Every action is implemented and every expected result has an assertion.
 4. Every selector is verified.
-5. All generated paths remain inside the Hybrid framework root.
+5. All generated paths remain inside the selected client Hybrid framework root, not the reference framework path.
 6. JavaScript parses and imports resolve.
 7. Fixture names match test destructuring.
 8. URLs and credentials from approved testcase data are present only in `.env`; generated JS files read environment variables.

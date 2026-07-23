@@ -1,4 +1,4 @@
-﻿# Playwright JavaScript Hybrid Run Healing
+# Playwright JavaScript Hybrid Run Healing
 
 Use this file when a generated Playwright JavaScript Hybrid test fails during Run Automation. These rules repair generated client automation only. They do not create new business test cases and they do not modify reference framework files.
 
@@ -27,7 +27,7 @@ Do not modify:
 ```text
 D:\skills\Agent_Skills
 D:\frameworks\StaticFrameworks
-updatedplaywrightjshybrid/core/**
+updatedplaywrightjshybrid/pageObjects/BasePage.js
 updatedplaywrightjshybrid/config/**
 updatedplaywrightjshybrid/fixtures/**
 updatedplaywrightjshybrid/utils/**

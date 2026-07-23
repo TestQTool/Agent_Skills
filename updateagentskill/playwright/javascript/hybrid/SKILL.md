@@ -1,4 +1,4 @@
-﻿---
+---
 name: hybrid
 description: Generate Playwright JavaScript Hybrid automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation that must create locator modules, page classes, fixtures, and Playwright tests compatible with the matching Hybrid static framework; never use this skill to create test cases or invent business scenarios.
 ---
@@ -157,7 +157,7 @@ Use fallback chains only from stable evidence or readable user-facing attributes
 ## Page and test rules
 
 - Use JavaScript ESM.
-- Extend `core/BasePage.js` in page classes.
+- Extend `pageObjects/BasePage.js` in page classes.
 - Put selectors, business actions, and assertions in `pageObjects/*.js`.
 - Use one meaningful action or assertion per page method.
 - Register page classes in the existing `fixtures/test.js` using lower-camel-case names.

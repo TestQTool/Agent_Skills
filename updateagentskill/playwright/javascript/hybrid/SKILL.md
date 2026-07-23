@@ -89,6 +89,14 @@ tests/<feature>.test.js
 
 Do not return only `.env`, only locator/page files, only coverage, or an empty operations list when selected testcase steps are present. If selectors are uncertain, still generate the locator object, page class, and test with best-effort accessible selectors and mark the selector status as `needs_exploration` in coverage/warnings.
 
+Hard dependency contract:
+
+- If any test imports `../pages/<Feature>Page.js`, the same response must include `pages/<Feature>Page.js` as a `createFile` or `replaceGeneratedFile` operation unless that exact file already exists in the selected client branch and is being intentionally reused.
+- If any test calls `new <Feature>Page(page)` or calls `<feature>Page.<method>()`, the page class file must define that constructor and every called method.
+- If any page class imports `../pageObjects/<Feature>PageObjects.js`, the same response must include `pageObjects/<Feature>PageObjects.js` unless that exact file already exists in the selected client branch and is being intentionally reused.
+- Never generate a test that calls page methods when the matching page class operation is missing.
+- Never generate a page class that uses locator properties when the matching locator object operation is missing.
+
 Update only when needed:
 
 ```text
@@ -176,6 +184,9 @@ Use fallback chains only from stable evidence or readable user-facing attributes
 - Register page classes in the existing `fixtures/test.js` using lower-camel-case names.
 - Import `test` only from `../fixtures/test.js`.
 - Import page classes in tests from `../pages/<Feature>Page.js`.
+- Every imported page class must exist in `pages/` and export the class used by the test.
+- Every page method called by a test must be implemented in the imported page class.
+- Page classes must import locator definitions from `../pageObjects/<Feature>PageObjects.js` and use those locators for interactions/assertions.
 - Do not create `page-objects/` files. Use `pageObjects/` for locator definitions and `pages/` for page classes.
 - Include the exact approved ID and title in the test name.
 - Include only approved testcase tags as Playwright `@tags` in the test title.
@@ -317,11 +328,11 @@ Return `ready` only when:
 5. All generated paths remain inside the selected client Hybrid framework root, not the reference framework path.
 6. JavaScript parses and imports resolve.
 7. Fixture names match test destructuring.
-8. URLs and credentials from approved testcase data are present only in `.env`; generated JS files read environment variables.
-9. Every `testData` object path referenced by generated tests exists in the generated or updated `test-data/testdata.json`.
-10. Generated test-data files contain selected testcase IDs/data only and do not carry stale unrelated testcase rows.
-11. No fixed waits or immediate boolean visibility assertions are used.
-12. `npm run test:list` succeeds after applying operations.
+10. URLs and credentials from approved testcase data are present only in `.env`; generated JS files read environment variables.
+11. Every `testData` object path referenced by generated tests exists in the generated or updated `test-data/testdata.json`.
+12. Generated test-data files contain selected testcase IDs/data only and do not carry stale unrelated testcase rows.
+13. No fixed waits or immediate boolean visibility assertions are used.
+14. `npm run test:list` succeeds after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors or assertion states are unverified; this response must still include runnable `pageObjects/*.js`, `pages/*.js`, and `tests/*.test.js` operations. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
 

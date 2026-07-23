@@ -1,6 +1,6 @@
 ---
 name: hybrid
-description: Generate Playwright JavaScript Hybrid automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation that must create locator modules, page classes, fixtures, and Playwright tests compatible with the matching Hybrid static framework; never use this skill to create test cases or invent business scenarios.
+description: Generate Playwright JavaScript Hybrid automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation that must create locator definitions, page classes, fixtures, and Playwright tests compatible with the matching Hybrid static framework; never use this skill to create test cases or invent business scenarios.
 ---
 
 # Playwright JavaScript Hybrid Script Generation
@@ -61,7 +61,8 @@ Return operation paths either relative to that selected root or prefixed with th
 .env
 test-data/testdata.json
 test-data/credentials.csv
-pageObjects/<Feature>Page.js
+pageObjects/<Feature>PageObjects.js
+pages/<Feature>Page.js
 tests/<feature>.test.js
 ```
 
@@ -71,20 +72,22 @@ or:
 updatedplaywrightjshybrid/.env
 updatedplaywrightjshybrid/test-data/testdata.json
 updatedplaywrightjshybrid/test-data/credentials.csv
-updatedplaywrightjshybrid/pageObjects/<Feature>Page.js
+updatedplaywrightjshybrid/pageObjects/<Feature>PageObjects.js
+updatedplaywrightjshybrid/pages/<Feature>Page.js
 updatedplaywrightjshybrid/tests/<feature>.test.js
 ```
 
 Never return generated paths beginning with `web-automation/`, `updatewebautomation/`, `playwright/javascript/hybrid/`, `Agent_Skills/`, or `StaticFrameworks/`.
 
-For every selected runnable test case, the response must include generator-owned operations for both:
+For every selected runnable test case, the response must include generator-owned operations for all three layers:
 
 ```text
-pageObjects/<Feature>Page.js
+pageObjects/<Feature>PageObjects.js
+pages/<Feature>Page.js
 tests/<feature>.test.js
 ```
 
-Do not return only `.env`, only a page object, only coverage, or an empty operations list when selected testcase steps are present. If selectors are uncertain, still generate the page object and test with best-effort accessible selectors and mark the selector status as `needs_exploration` in coverage/warnings.
+Do not return only `.env`, only locator/page files, only coverage, or an empty operations list when selected testcase steps are present. If selectors are uncertain, still generate the locator object, page class, and test with best-effort accessible selectors and mark the selector status as `needs_exploration` in coverage/warnings.
 
 Update only when needed:
 
@@ -99,8 +102,8 @@ Never regenerate or replace framework-owned configuration, `core`, utilities, va
 
 1. Validate the selected IDs and required step fields.
 2. Inspect existing feature files before generating operations.
-3. Map every approved action to one page method in `pageObjects/<Feature>Page.js`.
-4. Map every approved expected result to a Playwright web-first assertion in the same page object.
+3. Put selector definitions in `pageObjects/<Feature>PageObjects.js` and map every approved action to one page method in `pages/<Feature>Page.js`.
+4. Map every approved expected result to a Playwright web-first assertion in the page class.
 5. Use verified selector evidence as the primary selector source.
 6. If live selector evidence is present, choose selectors from that evidence before using testcase wording. Prefer stable `id`, `name`, `data-testid`, role/name, placeholder, visible label, and button/link text from the evidence.
 7. If selector evidence is missing or incomplete, infer only readable selectors, still return runnable feature files, and mark the response `needs_exploration`.
@@ -113,25 +116,35 @@ Technical navigation required to execute an approved action may be implemented i
 
 ## Page object rules
 
-Keep locators/selectors and page actions/assertions together in one page object file:
+Keep locators/selectors separate from page actions/assertions:
 
 ```js
-export default class LoginPage {
+// pageObjects/LoginPageObjects.js
+export class LoginPageObjects {
   constructor(page) {
-    this.page = page;
     this.usernameInput = page.getByRole('textbox', { name: 'Username' });
     this.passwordInput = page.getByLabel('Password');
     this.loginButton = page.getByRole('button', { name: 'Log In' });
   }
+}
+
+// pages/LoginPage.js
+import BasePage from './BasePage.js';
+import { LoginPageObjects } from '../pageObjects/LoginPageObjects.js';
+
+export default class LoginPage extends BasePage {
+  constructor(page) {
+    super(page);
+    this.locators = new LoginPageObjects(page);
+  }
 
   async login(username, password) {
-    await this.usernameInput.fill(username);
-    await this.passwordInput.fill(password);
-    await this.loginButton.click();
+    await this.fill(this.locators.usernameInput, username);
+    await this.fill(this.locators.passwordInput, password);
+    await this.click(this.locators.loginButton);
   }
 }
 ```
-
 Prefer selectors in this order:
 
 1. Stable selector evidence: `id`, `name`, `data-testid`, `data-test`, or `data-qa` from live inspection.
@@ -157,13 +170,13 @@ Use fallback chains only from stable evidence or readable user-facing attributes
 ## Page and test rules
 
 - Use JavaScript ESM.
-- Extend `pageObjects/BasePage.js` in page classes.
-- Put selectors, business actions, and assertions in `pageObjects/*.js`.
+- Extend `pages/BasePage.js` in page classes.
+- Put selectors only in `pageObjects/*.js`; put business actions and assertions in `pages/*.js`.
 - Use one meaningful action or assertion per page method.
 - Register page classes in the existing `fixtures/test.js` using lower-camel-case names.
 - Import `test` only from `../fixtures/test.js`.
-- Import page classes in tests from `../pageObjects/<Feature>Page.js`.
-- Do not create `page-objects/*.locators.js` or `pages/<Feature>Page.js`.
+- Import page classes in tests from `../pages/<Feature>Page.js`.
+- Do not create `page-objects/` files. Use `pageObjects/` for locator definitions and `pages/` for page classes.
 - Include the exact approved ID and title in the test name.
 - Include only approved testcase tags as Playwright `@tags` in the test title.
 - Preserve tag meaning and use values from the testcase `tags` field only. Example: testcase tag `Regression` becomes `@Regression`.
@@ -189,10 +202,10 @@ Use fallback chains only from stable evidence or readable user-facing attributes
 - Read credentials from `process.env.TEST_USERNAME` and `process.env.TEST_PASSWORD`, or through `utils/secrets.js`.
 - For negative login scenarios, read invalid username/password from test data and keep `.env` credentials valid/default.
 - In `tests/*.test.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Assign variables only from environment helpers or `process.env`, for example `const username = process.env.TEST_USERNAME;`.
-- In `pageObjects/*.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Methods should accept values as parameters or read safe framework environment helpers.
+- In `pages/*.js` and `pageObjects/*.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Page methods should accept values as parameters or read safe framework environment helpers.
 - Do not use literal fallbacks such as `process.env.TEST_PASSWORD || 'demo'`; missing runtime data should fail clearly or be supplied through `.env`.
 - Use relative paths in executable navigation after `BASE_URL` is configured.
-- Never put a full environment URL, username, password, or secret value in `.test.js`, `pageObjects/*.js`, test titles, step titles, notes, logs, or comments. Do not turn hidden values into visible text such as `Navigate to url process.env.BASE_URL`; use natural safe labels such as `Navigate to login page`.
+- Never put a full environment URL, username, password, or secret value in `.test.js`, `pages/*.js`, `pageObjects/*.js`, test titles, step titles, notes, logs, or comments. Do not turn hidden values into visible text such as `Navigate to url process.env.BASE_URL`; use natural safe labels such as `Navigate to login page`.
 - Never emit local absolute paths, backend paths, prompt-repository paths, or GitHub tokens.
 
 Bad generated test examples:
@@ -270,14 +283,15 @@ For runnable UI test cases, `operations` must contain at minimum:
 
 ```json
 [
-  { "type": "createFile", "path": "pageObjects/<Feature>Page.js", "content": "..." },
+  { "type": "createFile", "path": "pageObjects/<Feature>PageObjects.js", "content": "..." },
+  { "type": "createFile", "path": "pages/<Feature>Page.js", "content": "..." },
   { "type": "createFile", "path": "tests/<feature>.test.js", "content": "..." }
 ]
 ```
 
 Operation paths must use relative paths or the selected client root. They must not use the reference framework path.
 
-Include `.env` as a generated operation when selected testcase data contains an approved URL, valid/default username, valid/default password, or role. The `.env` operation does not replace the required page object and test operations. Include `test-data/testdata.json` or `test-data/credentials.csv` when testcase-specific or negative data is needed.
+Include `.env` as a generated operation when selected testcase data contains an approved URL, valid/default username, valid/default password, or role. The `.env` operation does not replace the required locator, page, and test operations. Include `test-data/testdata.json` or `test-data/credentials.csv` when testcase-specific or negative data is needed.
 
 Allowed operations:
 
@@ -307,9 +321,9 @@ Return `ready` only when:
 9. Every `testData` object path referenced by generated tests exists in the generated or updated `test-data/testdata.json`.
 10. Generated test-data files contain selected testcase IDs/data only and do not carry stale unrelated testcase rows.
 11. No fixed waits or immediate boolean visibility assertions are used.
-12. `npm run validate` and `npm run test:list` succeed after applying operations.
+12. `npm run test:list` succeeds after applying operations.
 
-Return `needs_exploration` when behavior is complete but selectors or assertion states are unverified; this response must still include runnable `pageObjects/*.js` and `tests/*.test.js` operations. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
+Return `needs_exploration` when behavior is complete but selectors or assertion states are unverified; this response must still include runnable `pageObjects/*.js`, `pages/*.js`, and `tests/*.test.js` operations. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
 
 
 

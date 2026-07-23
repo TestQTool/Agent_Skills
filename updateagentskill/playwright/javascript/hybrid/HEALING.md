@@ -16,6 +16,7 @@ Allowed generated files to patch:
 
 ```text
 updatedplaywrightjshybrid/pageObjects/*.js
+updatedplaywrightjshybrid/pages/*.js
 updatedplaywrightjshybrid/tests/*.test.js
 updatedplaywrightjshybrid/test-data/testdata.json
 updatedplaywrightjshybrid/test-data/credentials.csv
@@ -27,7 +28,7 @@ Do not modify:
 ```text
 D:\skills\Agent_Skills
 D:\frameworks\StaticFrameworks
-updatedplaywrightjshybrid/pageObjects/BasePage.js
+updatedplaywrightjshybrid/pages/BasePage.js
 updatedplaywrightjshybrid/config/**
 updatedplaywrightjshybrid/fixtures/**
 updatedplaywrightjshybrid/utils/**
@@ -55,11 +56,11 @@ Treat as healable automation defects:
 
 - Locator not found.
 - Locator strict mode violation caused by weak/generated selector.
-- Incorrect page object method selector.
+- Incorrect locator definition or page method selector.
 - Test references a missing key in `test-data/testdata.json` or `credentials.csv`.
 - Test uses stale generated data from another testcase ID.
 - Test hardcodes URL or credentials that should come from `.env` or test data.
-- Test imports a generated page object with wrong casing or wrong path.
+- Test imports a generated page class with wrong casing or wrong path.
 
 Treat as genuine app/test failure and do not heal:
 
@@ -144,7 +145,7 @@ TEST_PASSWORD=...
 
 Invalid credentials, empty values, alternate users, form inputs, expected messages, and testcase-specific values belong in test data, not `.env`.
 
-Generated JavaScript must not contain literal runtime URLs, usernames, passwords, or tokens from testcase steps. It must read them through `process.env`, framework helpers, or test data.
+Generated JavaScript in tests, pages, and pageObjects must not contain literal runtime URLs, usernames, passwords, or tokens from testcase steps. It must read them through `process.env`, framework helpers, or test data.
 
 ## Patch Output Contract
 
@@ -157,7 +158,7 @@ Return strict JSON only when asked to produce healing operations:
   "operations": [
     {
       "type": "replaceGeneratedFile",
-      "path": "updatedplaywrightjshybrid/pageObjects/LoginPage.js",
+      "path": "updatedplaywrightjshybrid/pages/LoginPage.js",
       "content": "..."
     }
   ],

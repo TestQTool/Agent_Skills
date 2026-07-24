@@ -261,12 +261,13 @@ await loginPage.login(invalidUsername, invalidPassword);
 }
 ```
 
-- If the backend adds traceability metadata, it belongs under `_metadata`; generated tests must not read from `_metadata` or `testCases`.
+- Do not add `_metadata`, raw testcase inventory, project metadata, source metadata, or traceability details to client `test-data/testdata.json`. Keep client framework data files focused on runtime inputs only.
 - If a generated test imports `test-data/testdata.json`, every referenced object path must exist in the same generated or updated `test-data/testdata.json` file.
 - Do not reference `testData.login`, `testData.credentials`, `testData.<feature>.<name>`, or any nested key unless that exact object path is present in the returned test-data operation.
 - If a test destructures `const { whitespaceUsername } = testData.login;`, then `test-data/testdata.json` must contain `login.whitespaceUsername`.
 - If a test reads `testData.login.invalidCredentials.username`, then `test-data/testdata.json` must contain `login.invalidCredentials.username`.
-- For each generation, `test-data/testdata.json` and `test-data/credentials.csv` must represent the selected testcase IDs only. Do not preserve stale testcase IDs, stale credentials, stale URLs, or stale rows from previous generations unless those IDs are also selected in the current request.
+- For each generation, `test-data/testdata.json` must represent the selected testcase runtime data only. Do not preserve stale testcase IDs, stale credentials, stale URLs, or stale rows from previous generations unless those IDs are also selected in the current request.
+- Generate `test-data/credentials.csv` only when the generated tests or framework helpers actually read that CSV file. Do not create a placeholder credentials file just because credentials exist in the testcase.
 - If an existing test-data file is reused, merge only the selected testcase data needed by the generated tests and remove or replace stale generator-owned data for the same feature.
 - Empty-field scenarios must use an explicit test-data object instead of assuming an object exists.
 

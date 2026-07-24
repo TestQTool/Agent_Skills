@@ -94,19 +94,24 @@ Do not use guessed labels when DOM evidence shows stable attributes. Example:
 // Bad after DOM shows id/name=username
 this.usernameInput = page.getByLabel('Username');
 
-// Good
-this.usernameInput = page.locator('#username').or(page.locator('input[name="username"]'));
+// Good when id is present
+this.usernameInput = page.locator('#username');
+
+// Good when name is the best stable evidence
+this.usernameInput = page.locator('input[name="username"]');
 ```
 
-For common login controls, use evidence-based resilient selectors when available:
+For common login controls, choose one evidence-backed strict-mode-safe selector per control:
 
 ```js
-this.usernameInput = page.locator('#username').or(page.locator('input[name="username"]'));
-this.passwordInput = page.locator('#password').or(page.locator('input[name="password"]'));
-this.loginButton = page.locator('#loginbtn').or(page.locator('button[type="submit"]'));
+this.usernameInput = page.locator('#username');
+this.passwordInput = page.locator('#password');
+this.loginButton = page.locator('button[type="submit"]');
 ```
 
-Only include fallback selectors that are supported by DOM evidence or stable semantic attributes. Do not add random class names, absolute XPath, nth-child selectors, or positional selectors.
+Do not use Playwright `locator.or()` in healed final code. If multiple selector candidates exist, choose the highest-priority candidate supported by DOM evidence and document rejected candidates in the healing reason or warnings, not in the source code.
+
+Do not add random class names, absolute XPath, nth-child selectors, positional selectors, or fallback selector chains that can hide strict-mode issues.
 
 ## Test Data Healing Rules
 

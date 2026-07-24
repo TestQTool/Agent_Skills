@@ -97,6 +97,27 @@ Hard dependency contract:
 - Never generate a test that calls page methods when the matching page class operation is missing.
 - Never generate a page class that uses locator properties when the matching locator object operation is missing.
 
+Fixture dependency contract:
+
+- If a generated test destructures a fixture such as `async ({ loginPage }) =>`, `fixtures/test.js` must already expose that exact lower-camel-case fixture or the response must include a `registerFixture` operation for it.
+- `registerFixture` must import the page class from `../pages/<Feature>Page.js`, instantiate it with `page`, and preserve all existing fixture imports and entries.
+- Do not destructure `loginPage`, `cartPage`, or any other page fixture in tests unless that fixture exists after applying operations.
+
+Example fixture registration:
+
+```js
+import { test as base, expect } from '@playwright/test';
+import LoginPage from '../pages/LoginPage.js';
+
+export const test = base.extend({
+  loginPage: async ({ page }, use) => {
+    await use(new LoginPage(page));
+  }
+});
+
+export { expect };
+```
+
 Update only when needed:
 
 ```text
@@ -116,9 +137,11 @@ Never regenerate or replace framework-owned configuration, `core`, utilities, va
 6. If live selector evidence is present, choose selectors from that evidence before using testcase wording. Prefer stable `id`, `name`, `data-testid`, role/name, placeholder, visible label, and button/link text from the evidence.
 7. If selector evidence is missing or incomplete, infer only readable selectors, still return runnable feature files, and mark the response `needs_exploration`.
 8. Generate exactly one Playwright test for each selected test-case ID.
-9. Reuse existing files and fixtures without removing unrelated content.
-10. Write approved runtime URL/credential values to `.env`, then read them through `process.env`.
-11. Return deterministic JSON operations and complete step coverage.
+9. Reuse existing files and fixtures without removing unrelated content. For same feature/module generation, append new selected testcase blocks into the existing feature test file and preserve existing testcase blocks not selected in the current request.
+10. If the selected testcase ID already exists in an existing generated test file, replace only that testcase block and its owned runtime data instead of creating a duplicate test or duplicate file.
+11. If a different feature/module is selected, create or update only that module's pageObjects, pages, tests, and runtime data files. Leave unrelated module files unchanged.
+12. Write approved runtime URL/credential values to `.env`, then read them through `process.env` or framework environment helpers.
+13. Return deterministic JSON operations and complete step coverage.
 
 Technical navigation required to execute an approved action may be implemented inside a page method. Record it in coverage with `technical: true`; do not turn it into a new business scenario or expectation.
 
@@ -197,7 +220,8 @@ Do not create TODO selector comments in generated runnable files. If selector ev
 - Use one meaningful action or assertion per page method.
 - Register page classes in the existing `fixtures/test.js` using lower-camel-case names.
 - Import `test` only from `../fixtures/test.js`.
-- Import page classes in tests from `../pages/<Feature>Page.js`.
+- Prefer registered page fixtures in tests. Do not instantiate `new <Feature>Page(page)` inside tests when a matching fixture exists or is being registered in the same response.
+- Import page classes in tests from `../pages/<Feature>Page.js` only when direct construction is unavoidable; otherwise rely on the registered fixture import in `fixtures/test.js`.
 - Every imported page class must exist in `pages/` and export the class used by the test.
 - Every page method called by a test must be implemented in the imported page class.
 - Page classes must import locator definitions from `../pageObjects/<Feature>PageObjects.js` and use those locators for interactions/assertions.
@@ -229,7 +253,9 @@ Do not create TODO selector comments in generated runnable files. If selector ev
 - In `tests/*.test.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Assign variables only from environment helpers or `process.env`, for example `const username = process.env.TEST_USERNAME;`.
 - In `pages/*.js` and `pageObjects/*.js`, never write literal URL, username, password, email, or credential strings from testcase steps. Page methods should accept values as parameters or read safe framework environment helpers.
 - Do not use literal fallbacks such as `process.env.TEST_PASSWORD || 'demo'`; missing runtime data should fail clearly or be supplied through `.env`.
-- Use relative paths in executable navigation after `BASE_URL` is configured.
+- `BASE_URL` must be the application origin/base host only. Page methods must navigate with relative paths through `BasePage.open(path)`, for example `await this.open('/web/index.php/auth/login')` inside `navigateToLoginPage()`.
+- Use relative paths in executable navigation after `BASE_URL` is configured. Do not pass `process.env.BASE_URL` into `BasePage.open(path)`.
+- Tests should call page navigation methods such as `await loginPage.navigateToLoginPage();`; tests should not directly navigate with full URLs.
 - Never put a full environment URL, username, password, or secret value in `.test.js`, `pages/*.js`, `pageObjects/*.js`, test titles, step titles, notes, logs, or comments. Do not turn hidden values into visible text such as `Navigate to url process.env.BASE_URL`; use natural safe labels such as `Navigate to login page`.
 - Never emit local absolute paths, backend paths, prompt-repository paths, or GitHub tokens.
 
@@ -246,7 +272,7 @@ Good generated test examples:
 ```js
 const username = process.env.TEST_USERNAME;
 const password = process.env.TEST_PASSWORD;
-await loginPage.open(process.env.BASE_URL);
+await loginPage.navigateToLoginPage();
 await loginPage.login(username, password);
 ```
 

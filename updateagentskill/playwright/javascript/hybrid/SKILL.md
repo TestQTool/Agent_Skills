@@ -167,13 +167,27 @@ Do not use absolute XPath, blind positional selectors, generated classes, or sel
 
 When live evidence contains a stable `id` or `name`, prefer it over a guessed label. Example: if evidence shows an input `{ "id": "username", "name": "username" }`, use `page.locator('#username')` or `page.locator('input[name="username"]')`; do not guess `page.getByLabel('Username')` unless the evidence confirms that label.
 
-For important actions such as login, generate a resilient locator strategy in the page object when evidence gives multiple stable candidates:
+For important actions such as login, choose one strict-mode-safe locator per property. Do not combine multiple selectors with Playwright `locator.or()` in generated locator definitions, page methods, or assertions.
 
 ```js
-this.usernameInput = page.locator('#username').or(page.locator('input[name="username"]'));
+this.usernameInput = page.locator('input[name="username"]');
+this.passwordInput = page.locator('input[name="password"]');
+this.loginButton = page.getByRole('button', { name: 'Login' });
 ```
 
-Use fallback chains only from stable evidence or readable user-facing attributes. Do not chain random selectors.
+If multiple stable selector candidates exist, pick the most specific evidence-backed selector in the documented priority order instead of chaining them. A generated locator used by `click`, `fill`, or `expect(...).toBeVisible()` must resolve to exactly one intended element.
+
+For page-displayed assertions, do not assert a broad container fallback such as `page.locator('.container').or(page.locator('form'))`. Prefer asserting the unique required controls for that page:
+
+```js
+async verifyLoginPageDisplayed() {
+  await this.expectVisible(this.locators.usernameInput);
+  await this.expectVisible(this.locators.passwordInput);
+  await this.expectVisible(this.locators.loginButton);
+}
+```
+
+Do not create TODO selector comments in generated runnable files. If selector evidence is unavailable, still generate best-effort strict locators and mark uncertainty in `coverage/warnings`, not in source comments.
 
 ## Page and test rules
 

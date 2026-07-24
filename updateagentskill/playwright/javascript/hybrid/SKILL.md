@@ -246,6 +246,9 @@ await loginPage.login(invalidUsername, invalidPassword);
 ## Test-data consistency
 
 - `test-data/testdata.json` is runtime input data, not the primary testcase inventory. Do not make generated tests depend on raw metadata under `testCases`.
+- `test-data/testdata.json` content must be strict valid JSON only. Never put JavaScript expressions, `process.env.*`, `undefined`, comments, single-quoted strings, or trailing commas inside JSON.
+- If a runtime value should come from `.env`, do not duplicate it in `testdata.json`; read it in the JavaScript test from `process.env` or the framework environment helper.
+- JSON values must be literals: strings, numbers, booleans, arrays, objects, or null. For whitespace input, use a quoted string such as `"   "`.
 - Structure runtime JSON by business feature/module and scenario data key:
 
 ```json

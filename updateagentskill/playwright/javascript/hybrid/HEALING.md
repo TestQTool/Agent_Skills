@@ -48,7 +48,7 @@ Framework-owned support files can be read for context but must not be rewritten 
 6. Push healed code back to the selected generated branch only after the rerun passes.
 7. If rerun fails, do not push the patch. Report the remaining failure and the attempted fix.
 
-Maximum auto-heal attempts: `2` per selected script.
+Maximum auto-heal attempts: `1` per selected script.
 
 ## Failure Classification
 
@@ -71,7 +71,7 @@ Treat as genuine app/test failure and do not heal:
 - Required testcase data is not available in approved input, `.env`, or test data.
 - Environment URL is unreachable or redirects to an unrelated page.
 
-When uncertain, stop and report `needs_manual_review` instead of guessing.
+When uncertain, return `"status": "manual_review"` with a clear reason instead of guessing.
 
 ## Locator Healing Rules
 
@@ -136,7 +136,7 @@ Valid repair:
 }
 ```
 
-Do not invent usernames, passwords, messages, URLs, or business data. If data is missing from approved testcase input, return `needs_manual_review`.
+Do not invent usernames, passwords, messages, URLs, or business data. If data is missing from approved testcase input, return `"status": "manual_review"` with a clear reason.
 
 ## Runtime Data Rules
 
@@ -152,27 +152,32 @@ Invalid credentials, empty values, alternate users, form inputs, expected messag
 
 Generated JavaScript in tests, pages, and pageObjects must not contain literal runtime URLs, usernames, passwords, or tokens from testcase steps. It must read them through `process.env`, framework helpers, or test data.
 
-## Patch Output Contract
+## Output Contract
 
-Return strict JSON only when asked to produce healing operations:
+Return strict JSON only. Do not include any text outside the JSON object.
 
 ```json
 {
-  "status": "healed | needs_manual_review | genuine_failure",
-  "reason": "short reason",
-  "operations": [
+  "status": "fixed | manual_review",
+  "summary": "short explanation of what was fixed or why manual review is needed",
+  "files": [
     {
-      "type": "replaceGeneratedFile",
       "path": "updatedplaywrightjshybrid/pages/LoginPage.js",
-      "content": "..."
+      "content": "full updated file content"
     }
   ],
-  "rerunRequired": true,
-  "pushPolicy": "push_only_after_rerun_passes"
+  "reason": "only required for manual_review, explains why healing was not possible"
 }
 ```
 
-Operation paths must stay inside the selected generated client framework root. Never output paths inside the skill repo or static framework repo.
+### Field rules
+
+- `status`: Use `"fixed"` when healing was applied and rerun should proceed. Use `"manual_review"` when the failure cannot be safely auto-healed.
+- `summary`: Brief human-readable explanation of the healing performed or the reason for manual review.
+- `files`: Array of objects, each with a `path` (relative to the generated client framework root) and `content` (the complete updated file content). Include every generated file that was changed.
+- `reason`: Required only when `status` is `"manual_review"`. Explain why automatic healing was not possible (e.g., wrong URL, missing DOM evidence, genuine app failure).
+
+File paths must stay inside the selected generated client framework root (e.g., `updatedplaywrightjshybrid/...`). Never output paths outside that root.
 
 ## Completion Gate
 

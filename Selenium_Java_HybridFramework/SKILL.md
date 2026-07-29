@@ -1,240 +1,105 @@
-SKILL: /build-scripts
-# Command  : /build-scripts <feature>
-# Purpose  : Convert approved test cases into production-ready Java files —
-#             one Page class and one Test class per feature.
-#             Output must compile and run with mvn clean test without modification.
-# Reads    : test-cases/<feature>/test-cases.md  (TC titles, steps, expected results)
-#             test-cases/<feature>/exploration-notes.md  (@FindBy annotations)
-#             docs/app-context.md  (URL, module, credentials)
-#             CLAUDE.md  (framework rules, auto-loaded)
-# Writes   : src/test/java/pages/<Feature>Page.java
-#             src/test/java/testcases/<Feature>TC.java
-
+---
+name: Selenium_Java_HybridFramework
+description: Generate Selenium Java Hybridframework automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation against the matching static framework; never use this skill to create test cases or invent business scenarios.
 ---
 
-## OUTPUT — TWO FILES PER FEATURE
+# Selenium Java Hybridframework Script Generation
 
----
+Generate runnable, framework-compatible automation for the existing `Selenium_Java_HybridFramework` stack. Treat selected approved test cases as the only behavioral source of truth.
 
-### FILE 1: src/test/java/pages/<Feature>Page.java
+## Run Automation Healing
 
-```java
-package pages;
+For run-failure repair, use the sibling `HEALING.md` file in this directory. Keep generation rules in this `SKILL.md`; keep runtime repair, failure classification, rerun, and push-after-pass policy in `HEALING.md`.
 
-import managers.WebActions;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-import utilities.ConfigReader;
-import utilities.ExtentReportManager;
+## Required Input
 
-public class <Feature>Page extends BasePage {
+Require:
 
-    private final Logger logger = LogManager.getLogger(this.getClass());
+- Framework version and existing target-repository files.
+- Selected approved test cases containing `id`, `title`, ordered `steps`, and optional approved `tags`, `preconditions`, and `dataReferences`.
+- Every step containing `number`, `action`, and `expected`.
+- Application routes, endpoint details, device/browser target, and safe runtime data references required by those steps.
+- Selector, element, API schema, or mobile object evidence when production-ready output is requested.
 
-    public <Feature>Page(WebDriver driver) {
-        super(driver);
-    }
+Use only data present in the selected approved test cases. Do not invent URLs, users, passwords, roles, tags, devices, endpoints, assertions, or business scenarios.
 
-    // ── Locators ──────────────────────────────────────────────────────────────
-    // Paste @FindBy annotations from exploration-notes.md
-    // Group by section with comments
+## Target Output Contract
 
-    @FindBy(id = "field-id")
-    private WebElement fieldElement;
+The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `updatewebautomation/`.
 
-    // ── Actions ───────────────────────────────────────────────────────────────
-    // One method = one meaningful user action
-    // Use webActions.* for everything — never driver.findElement() here
+Generated files must target the selected client framework root from the request, or paths relative to that selected root.
 
-    public void enterField(String value) {
-        webActions.sendKeys(fieldElement, value, "Field Name");
-        logger.info("Entered value: " + value);
-        ExtentReportManager.logInfo("Entered value in Field Name");
-    }
+Allowed generated/updated areas for this stack:
 
-    // ── Assertions ────────────────────────────────────────────────────────────
-    // verify* methods only — use webActions.assertEquals / verifyElementPresence
+- `src/test/java/**/*`
+- `src/test/resources/**/*`
+- `src/main/java/**/*`
+- `test-data/**/*`
+- `pom.xml`
 
-    public void verifyFieldValue(String expected) {
-        webActions.assertEquals(fieldElement, expected, "Field value mismatch");
-        ExtentReportManager.logInfo("Verified field value: " + expected);
-    }
+Return strict JSON only:
+
+```json
+{
+  "status": "ready | needs_exploration | blocked",
+  "tool": "Selenium",
+  "language": "Java",
+  "frameworkType": "Hybridframework",
+  "testCaseIds": ["TC-001"],
+  "operations": [],
+  "coverage": [],
+  "warnings": []
 }
 ```
 
----
+For every selected runnable test case, the response must include all files needed for a runnable implementation in this stack. Do not return only metadata, only data files, only placeholders, or an empty operations list when selected testcase steps are present.
 
-### FILE 2: src/test/java/testcases/<Feature>TC.java
+## Hard Dependency Contract
 
-```java
-package testcases;
+- If a generated test imports or calls a local helper, page, screen, keyword, fixture, step definition, request client, data file, or configuration file, that dependency must already exist in the selected branch or be returned in the same response.
+- Never generate tests that call missing methods, missing keywords, missing fixtures, missing page/screen classes, missing request clients, or missing data keys.
+- If a generated test references runtime data, the exact object path, CSV header, property, or environment variable must exist after applying operations.
+- Update only generator-owned feature files or narrowly scoped framework extension points. Do not rewrite framework-owned bootstrap, drivers, runners, reporters, lockfiles, or global configuration unless the user explicitly asks.
 
-import io.qameta.allure.*;
-import managers.WebDriversFactory;
-import org.testng.Assert;
-import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
-import pages.<Feature>Page;
-import utilities.ExtentReportManager;
+## Workflow
 
-@Listeners(listeners.Listeners.class)
-public class <Feature>TC extends WebDriversFactory {
+1. Validate selected IDs and required step fields.
+2. Inspect existing target-repository files before generating operations.
+3. Reuse matching feature/module files when selected testcase intent belongs there.
+4. Replace only the selected testcase block when the same testcase ID already exists.
+5. Create a new module only when no existing module reasonably matches.
+6. Map every approved action to an implementation method/keyword/request/action.
+7. Map every approved expected result to a retrying assertion/check supported by `Selenium`.
+8. Use selector/API/mobile evidence as the primary source. If evidence is incomplete, produce runnable best-effort output and mark `needs_exploration`.
+9. Preserve approved tags exactly; do not invent tags from title, priority, type, category, or status.
+10. Return deterministic JSON operations and complete step coverage.
 
-    @Test(groups = "regression", description = "TC-XXX-001: [Exact title from test-cases.md]")
-    @Description("TC-XXX-001: [Exact title from test-cases.md]")
-    @Epic("EPIC001")
-    @Feature("Feature: <FeatureName>")
-    @Story("Story: <FlowName>")
-    @Severity(SeverityLevel.NORMAL)
-    public void tc_XXX_001_methodName() {
-        <Feature>Page featurePage = new <Feature>Page(WebDriversFactory.getWebDriver());
+## Runtime Data And Security
 
-        ExtentReportManager.logInfo("Step 1: description");
-        featurePage.enterField("value");
-        ExtentReportManager.attachScreenshot(WebDriversFactory.getWebDriver());
+- Put base URLs, valid/default runtime credentials, device names, and environment-level settings in environment/config files supported by the framework.
+- Put invalid credentials, alternate users, form values, request bodies, expected messages, product names, search text, and testcase-specific data in framework test-data files.
+- Generated executable code must not contain literal secrets, tokens, cookies, private keys, production credentials, or platform credentials.
+- Do not use literal fallback secrets such as `process.env.PASSWORD || 'demo'` or equivalent in any language.
+- Test titles, step titles, logs, comments, and report labels must not expose hidden runtime values.
 
-        featurePage.verifyFieldValue("expected");
-        ExtentReportManager.logPass("TC-XXX-001 passed");
-    }
-}
-```
+## Quality Rules
 
----
+- Follow the selected static framework's existing lifecycle, fixtures, hooks, drivers, clients, runners, listeners, and reporting utilities.
+- Do not duplicate browser, driver, API client, mobile session, or report setup inside each generated test when the framework already provides it.
+- Prefer stable selectors/object locators/schema fields from evidence over guessed wording.
+- Do not use fixed sleeps when the framework provides retrying waits/assertions.
+- Keep generated code deterministic, minimal, and scoped to selected testcase IDs.
 
-## PAGE CLASS RULES
+## Completion Gates
 
-| Rule | Detail |
-|------|--------|
-| Package | `pages` |
-| Extends | `BasePage` |
-| Constructor | `super(driver)` only — nothing else |
-| Locators | `private WebElement` + `@FindBy` — no exceptions |
-| Interactions | `webActions.*` only |
-| Logging | `logger.info(...)` on every step |
-| Raw driver allowed | `driver.getTitle()` and `driver.getCurrentUrl()` only |
+Return `ready` only when:
 
-### @FindBy Priority
-`id` → `name` → `css` → `linkText` → `partialLinkText` → `xpath` (last resort, keep short)
+1. Every requested ID exists in approved input.
+2. Exactly one generated runnable test/scenario/spec maps to each selected ID.
+3. Every action is implemented and every expected result has an assertion/check.
+4. All imports, method calls, fixtures, keywords, request clients, and data references resolve.
+5. Generated paths remain inside the selected client framework root.
+6. No secrets or literal runtime credentials are exposed in executable files.
+7. The framework's list/compile/smoke command can run after applying operations.
 
----
-
-## TEST CLASS RULES
-
-| Rule | Detail |
-|------|--------|
-| Package | `testcases` |
-| Extends | `WebDriversFactory` |
-| Listener | `@Listeners(listeners.Listeners.class)` on class — mandatory |
-| Driver | `WebDriversFactory.getWebDriver()` only |
-| Page objects | Instantiate **inside** each `@Test` method — not as class fields |
-| Method name | `tc_[PREFIX]_[NNN]_[camelCaseDescription]()` |
-| Allure | `@Description` `@Epic` `@Feature` `@Story` `@Severity` on every test |
-| Assertions | `Assert.*` from TestNG |
-| Groups | Match suite from `test-cases.md` → `sanity` / `regression` / `smoke` |
-
----
-
-## WEBACTIONS METHOD REFERENCE
-
-```java
-// Clicks
-webActions.click(element, "Name");
-webActions.javaScriptExecutorClick(element, "Name");
-webActions.doubleClick(element);
-
-// Input
-webActions.sendKeys(element, text, "Name");
-webActions.getText(element, "Name");                         // → String
-
-// HTML <select> dropdowns
-webActions.selectByText(element, "Visible Text");
-webActions.selectByIndex(element, 0);
-webActions.selectByValue(element, "value");
-
-// Custom dropdowns (div / ul / li)
-webActions.multipleSelectByChoice(triggerEl, By.xpath("//li"), "Option1");
-
-// Assertions
-webActions.assertEquals(element, "expected", "message");
-webActions.verifyElementPresence(element, "Name");
-
-// Explicit waits
-webActions.waitVisibilityOfElementLocated(By.id("id"));
-webActions.waitElementToBeClickable(By.xpath("//btn"));      // waits AND clicks
-webActions.waitPresenceOfElementLocated(By.cssSelector(".c"));
-webActions.waitVisibilityOfAllElementsLocated(By.xpath("//li"));
-webActions.waitAlertIsPresent();
-
-// Alerts
-webActions.alertAccept();   webActions.alertDismiss();
-webActions.alertSendKeys("text");   webActions.alertGetText();
-
-// Mouse
-webActions.moveToElement(el);   webActions.dragAndDrop(src, tgt);
-
-// Scroll / JS
-webActions.scrollToElement(el);   webActions.scrollBy(0, 500);
-webActions.setAttribute(el, "value", "text");
-
-// Frames
-webActions.switchToFrame(el);   webActions.switchToFrameById("id");
-webActions.switchToFrameByIndex(0);   webActions.switchToDefaultContent();
-
-// Robot
-webActions.pressEnter();   webActions.pressTab();   webActions.pressEscape();
-```
-
----
-
-## DATA ACCESS
-
-```java
-// Config
-ConfigReader.getUsername()   ConfigReader.getPassword()   ConfigReader.getProperty("key")
-
-// Excel
-ExcelReader excel = new ExcelReader(ExcelFiles + "File.xlsx");
-excel.getCellData("Sheet1", rowIndex, colIndex);   // rowIndex starts at 1
-
-// JSON
-JsonReader.getLoginElement("key")   JsonReader.getHomeElement("key")
-```
-
----
-
-## ALLURE SEVERITY MAPPING
-
-| Scenario | SeverityLevel |
-|----------|---------------|
-| Blocks all testing | `BLOCKER` |
-| Core functionality | `CRITICAL` |
-| Standard positive | `NORMAL` |
-| Minor negative / validation | `MINOR` |
-| Edge case | `TRIVIAL` |
-
----
-
-## FORBIDDEN PATTERNS
-
-| ❌ Never generate | Reason |
-|------------------|--------|
-| `@BeforeMethod` / `@AfterMethod` in test class | Already in `WebDriversFactory` |
-| `Thread.sleep(n)` | Use `webActions.wait*` |
-| `driver.findElement(...)` in page methods | Use `@FindBy` + `webActions` |
-| Hardcoded URL / credentials / timeouts | Use `ConfigReader` |
-| New utility classes duplicating existing | Use `ExcelReader`, `JsonReader`, `ConfigReader` |
-| `ExtentReportManager.initializeReport(...)` | Handled by `Listeners.java` |
-| Mobile / Appium imports in web files | Web = web only |
-
----
-
-## LOCATORS UNKNOWN?
-If exploration notes don't have locators for a specific element:
-1. Use the most generic stable pattern for the element type
-2. Add comment: `// TODO: verify locator against live app`
-3. Group all unverified locators at the bottom under:
-   `// ── UNVERIFIED — update after /explore session ──`
+Return `needs_exploration` when behavior is complete but selectors, mobile elements, API examples, or assertion states are unverified. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.

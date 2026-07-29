@@ -1,4 +1,4 @@
-# Playwright JavaScript Hybrid Run Healing
+﻿# Playwright JavaScript Hybrid Run Healing
 
 Use this file when a generated Playwright JavaScript Hybrid test fails during Run Automation. These rules repair generated client automation only. They do not create new business test cases and they do not modify reference framework files.
 
@@ -48,7 +48,7 @@ Framework-owned support files can be read for context but must not be rewritten 
 6. Push healed code back to the selected generated branch only after the rerun passes.
 7. If rerun fails, do not push the patch. Report the remaining failure and the attempted fix.
 
-Maximum auto-heal attempts: `1` per selected script.
+Maximum auto-heal attempts: `1` for a hard failure, plus `1` additional targeted attempt only when the healed rerun exits successfully but Playwright reports flaky retries.
 
 ## Failure Classification
 
@@ -152,6 +152,39 @@ Invalid credentials, empty values, alternate users, form inputs, expected messag
 
 Generated JavaScript in tests, pages, and pageObjects must not contain literal runtime URLs, usernames, passwords, or tokens from testcase steps. It must read them through `process.env`, framework helpers, or test data.
 
+## Flaky Rerun Healing Rules
+
+A rerun is not cleanly healed when Playwright exits with code `0` but reports flaky retries, such as `1 flaky` or `2 flaky` in terminal output.
+
+When the first healed rerun is flaky:
+
+1. Treat the result as unstable, not passed.
+2. Read the flaky rerun logs together with the original failure logs.
+3. Identify why the test needed retry to pass.
+4. Apply one additional minimal patch focused only on reducing retry-dependent behavior.
+5. Do not push any healed files unless the next rerun passes cleanly with no flaky summary.
+
+Common flaky causes to repair when evidence supports them:
+
+- Assertion runs before the UI reaches the expected state.
+- Click or fill happens before the element is attached, visible, enabled, or stable.
+- Network-backed content is asserted without waiting for the relevant response, URL, or DOM state.
+- Test depends on stale state from a previous test run.
+- Locator matches transient or duplicate elements during page transitions.
+- Test data cleanup/setup is incomplete and causes intermittent state.
+
+Preferred Playwright repairs:
+
+- Use locator auto-waiting with `await expect(locator).toBeVisible()` or `toBeEnabled()` before interaction only when the log shows readiness timing.
+- Wait for specific page state, URL, response, or durable DOM change instead of fixed sleeps.
+- Make selectors strict and stable so retries are not hiding ambiguous locator behavior.
+- Isolate generated test data when repeated runs can collide.
+- Keep retries as a runner safety net; do not add or increase retries in healed test code to hide instability.
+
+Do not heal flaky behavior by adding arbitrary `waitForTimeout`, broad fallback selectors, repeated clicks, try/catch swallowing, larger global timeouts, or extra Playwright retries.
+
+If the reason for flakiness cannot be proven from logs, DOM evidence, screenshots/traces, or selected testcase data, return `"status": "manual_review"` and explain what evidence is missing.
+
 ## Output Contract
 
 Return strict JSON only. Do not include any text outside the JSON object.
@@ -186,5 +219,8 @@ A heal is complete only when:
 1. The patch changes only generated client files.
 2. The reason is supported by run logs, screenshots, error context, DOM evidence, or selected testcase data.
 3. The same script is rerun headlessly.
-4. The rerun passes.
+4. The rerun passes cleanly with no Playwright flaky summary.
 5. Only then the healed files are pushed to the selected generated branch.
+
+
+

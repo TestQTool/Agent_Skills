@@ -1,153 +1,103 @@
 ---
-name: github-pr-merge
-description: Merge a reviewed GitHub pull request for generated automation work. Use when the user clicks Merge Request after a PR has been raised/reviewed. Verifies merge readiness, merges with the requested method, optionally deletes the source branch, and reports merge result.
+name: GitHub_PR_Merge
+description: Generate GitHub Workflow Workflow Pr Merge automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation against the matching static framework; never use this skill to create test cases or invent business scenarios.
 ---
 
-# GitHub PR Merge Skill
+# GitHub Workflow Workflow Pr Merge Script Generation
 
-## Role
-You are a GitHub merge gatekeeper for generated automation work. Your job is to merge only when the pull request is ready and safe.
+Generate runnable, framework-compatible automation for the existing `GitHub_PR_Merge` stack. Treat selected approved test cases as the only behavioral source of truth.
 
-Use this after PR raise/review says the pull request is ready.
+## Run Automation Healing
 
----
+For run-failure repair, use the sibling `HEALING.md` file in this directory. Keep generation rules in this `SKILL.md`; keep runtime repair, failure classification, rerun, and push-after-pass policy in `HEALING.md`.
 
-## Backend Endpoint
+## Required Input
 
-```http
-POST /api/v1/github/configs/{configId}/pull-requests/{pullRequestNumber}/merge
-```
+Require:
 
----
+- Framework version and existing target-repository files.
+- Selected approved test cases containing `id`, `title`, ordered `steps`, and optional approved `tags`, `preconditions`, and `dataReferences`.
+- Every step containing `number`, `action`, and `expected`.
+- Application routes, endpoint details, device/browser target, and safe runtime data references required by those steps.
+- Selector, element, API schema, or mobile object evidence when production-ready output is requested.
 
-## Merge Request
+Use only data present in the selected approved test cases. Do not invent URLs, users, passwords, roles, tags, devices, endpoints, assertions, or business scenarios.
+
+## Target Output Contract
+
+The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `updatewebautomation/`.
+
+Generated files must target the selected client framework root from the request, or paths relative to that selected root.
+
+Allowed generated/updated areas for this stack:
+
+- `tests/**/*`
+- `test-data/**/*`
+- `config/**/*`
+
+Return strict JSON only:
 
 ```json
 {
-  "commitTitle": "Merge Playwright automation for ADO-1234",
-  "commitMessage": "Generated automation scripts for selected work items.",
-  "mergeMethod": "squash",
-  "deleteSourceBranch": false
-}
-```
-
-Rules:
-
-- `mergeMethod` can be `merge`, `squash`, or `rebase`.
-- Default merge method is `squash`.
-- `deleteSourceBranch` is optional and should be false unless the user explicitly requests cleanup.
-
----
-
-## Merge Gate
-
-Before merging, review the PR and merge only when:
-
-- PR exists and is open.
-- PR is not draft.
-- GitHub reports `mergeable=true`.
-- Merge decision is `ready`.
-- Source branch and target branch are correct.
-- No conflicts are reported.
-- Changed files are expected automation/framework files.
-- No secrets, prompt files, backend paths, or local machine paths are present.
-
-Block merge when:
-
-- PR is draft.
-- PR is closed or already merged.
-- GitHub mergeability is pending/unknown.
-- GitHub reports conflicts.
-- The PR touches unrelated files.
-- Protected branch policy requires human approval or failing checks are present.
-
----
-
-## AI Conflict Resolution Flow
-
-When the user clicks **Merge to Target** and GitHub reports conflicts, the merge agent must try to resolve safely before returning a blocked state.
-
-Required flow:
-
-1. Verify the backend can run Git on the current host. If a configured absolute Git path does not exist, fall back to `git` from `PATH`.
-2. Sync the latest source branch and target branch.
-3. Checkout the source branch from `origin/sourceBranch`.
-4. Attempt a normal merge from the target branch into the source branch.
-5. If Git reports conflicted files, collect only files with unresolved conflict status.
-6. For each conflicted file, send the full file content with conflict markers to the AI merge resolver.
-7. AI must classify the file before resolving:
-   - generated feature file
-   - framework wiring file
-   - static framework file
-   - user-owned custom file
-8. AI must return the complete resolved file content only.
-9. Backend must reject the AI result if it is blank or still contains conflict markers.
-10. Stage resolved files, commit the conflict-resolution commit, push the source branch, then re-check GitHub mergeability.
-11. Merge only after GitHub reports the PR is mergeable.
-
-Use the shared rules from `../GitHub_Workflow/SKILL.md` and review rules from `../GitHub_PR_Raise_Review/SKILL.md` while resolving.
-
----
-
-## AI Conflict Prompt Contract
-
-The merge agent should provide AI with:
-
-- repository name
-- source branch
-- target branch
-- conflicted file path
-- loaded GitHub workflow skill context
-- the complete conflicted file content
-
-AI response rules:
-
-- Return only the resolved file content.
-- Do not return markdown explanations.
-- Do not return JSON unless explicitly requested by backend.
-- Remove all `<<<<<<<`, `=======`, and `>>>>>>>` markers.
-- Preserve user-owned custom code by default.
-- Preserve valid generated automation framework files and latest generated tests.
-- For wiring files such as `pom.xml`, `package.json`, suite XML, configs, fixtures, and CI files, merge both sides carefully.
-- If intent is ambiguous, do not guess; return a conflict report/blocker instead of inventing code.
-
-Backend validation rules:
-
-- Reject blank AI output.
-- Reject AI output containing conflict markers.
-- Reject files that introduce secrets, local machine paths, backend prompt files, or Agent_Skills content.
-- Re-run mergeability review after pushing resolved source branch.
-
----
-
-## Response Contract
-
-```json
-{
-  "status": "merged",
-  "message": "Pull request merged.",
-  "repository": "owner/repo",
-  "pullRequestNumber": 123,
-  "pullRequestUrl": "https://github.com/owner/repo/pull/123",
-  "sourceBranch": "feature/kishore/gen-ts/ADO-1234",
-  "targetBranch": "develop",
-  "merged": true,
-  "mergeMethod": "squash",
-  "mergedSha": "abc123",
-  "mergeDecision": "merged",
-  "filesChanged": ["playwright-js/tests/Login.test.js"],
+  "status": "ready | needs_exploration | blocked",
+  "tool": "GitHub Workflow",
+  "language": "Workflow",
+  "frameworkType": "Pr Merge",
+  "testCaseIds": ["TC-001"],
+  "operations": [],
+  "coverage": [],
   "warnings": []
 }
 ```
 
----
+For every selected runnable test case, the response must include all files needed for a runnable implementation in this stack. Do not return only metadata, only data files, only placeholders, or an empty operations list when selected testcase steps are present.
 
-## Hard Rules
+## Hard Dependency Contract
 
-- Never merge a PR with unresolved conflicts.
-- Never merge a draft PR.
-- Never merge when GitHub mergeability is pending; review again later.
-- Never delete a source branch unless `deleteSourceBranch=true`.
-- Never use `git merge -X ours` or `git merge -X theirs` as the primary conflict strategy for generated automation repositories.
-- Never report "merged" unless GitHub merge API confirms the merge.
-- Always report merge method, merged SHA, PR URL, and changed files.
+- If a generated test imports or calls a local helper, page, screen, keyword, fixture, step definition, request client, data file, or configuration file, that dependency must already exist in the selected branch or be returned in the same response.
+- Never generate tests that call missing methods, missing keywords, missing fixtures, missing page/screen classes, missing request clients, or missing data keys.
+- If a generated test references runtime data, the exact object path, CSV header, property, or environment variable must exist after applying operations.
+- Update only generator-owned feature files or narrowly scoped framework extension points. Do not rewrite framework-owned bootstrap, drivers, runners, reporters, lockfiles, or global configuration unless the user explicitly asks.
+
+## Workflow
+
+1. Validate selected IDs and required step fields.
+2. Inspect existing target-repository files before generating operations.
+3. Reuse matching feature/module files when selected testcase intent belongs there.
+4. Replace only the selected testcase block when the same testcase ID already exists.
+5. Create a new module only when no existing module reasonably matches.
+6. Map every approved action to an implementation method/keyword/request/action.
+7. Map every approved expected result to a retrying assertion/check supported by `GitHub Workflow`.
+8. Use selector/API/mobile evidence as the primary source. If evidence is incomplete, produce runnable best-effort output and mark `needs_exploration`.
+9. Preserve approved tags exactly; do not invent tags from title, priority, type, category, or status.
+10. Return deterministic JSON operations and complete step coverage.
+
+## Runtime Data And Security
+
+- Put base URLs, valid/default runtime credentials, device names, and environment-level settings in environment/config files supported by the framework.
+- Put invalid credentials, alternate users, form values, request bodies, expected messages, product names, search text, and testcase-specific data in framework test-data files.
+- Generated executable code must not contain literal secrets, tokens, cookies, private keys, production credentials, or platform credentials.
+- Do not use literal fallback secrets such as `process.env.PASSWORD || 'demo'` or equivalent in any language.
+- Test titles, step titles, logs, comments, and report labels must not expose hidden runtime values.
+
+## Quality Rules
+
+- Follow the selected static framework's existing lifecycle, fixtures, hooks, drivers, clients, runners, listeners, and reporting utilities.
+- Do not duplicate browser, driver, API client, mobile session, or report setup inside each generated test when the framework already provides it.
+- Prefer stable selectors/object locators/schema fields from evidence over guessed wording.
+- Do not use fixed sleeps when the framework provides retrying waits/assertions.
+- Keep generated code deterministic, minimal, and scoped to selected testcase IDs.
+
+## Completion Gates
+
+Return `ready` only when:
+
+1. Every requested ID exists in approved input.
+2. Exactly one generated runnable test/scenario/spec maps to each selected ID.
+3. Every action is implemented and every expected result has an assertion/check.
+4. All imports, method calls, fixtures, keywords, request clients, and data references resolve.
+5. Generated paths remain inside the selected client framework root.
+6. No secrets or literal runtime credentials are exposed in executable files.
+7. The framework's list/compile/smoke command can run after applying operations.
+
+Return `needs_exploration` when behavior is complete but selectors, mobile elements, API examples, or assertion states are unverified. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.

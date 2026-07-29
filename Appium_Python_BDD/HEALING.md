@@ -1,4 +1,4 @@
-# Appium Python BDD Run Healing
+﻿# Appium Python BDD Run Healing
 
 Use this file when generated `Appium_Python_BDD` automation fails during Run Automation. These rules repair generated client automation only. They do not create new business test cases and they do not modify reference framework files.
 
@@ -105,3 +105,33 @@ A heal is complete only when:
 3. The same script/spec/scenario is rerun in the isolated workspace.
 4. The rerun passes.
 5. Only then are healed files pushed to the selected generated branch.
+
+## Qentrix Standard Healing Contract
+
+This healing file is for Appium_Python_BDD using Appium / Python / BDD Cucumber. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this tool's own repair patterns and generated file zones.
+
+- Heal generated client automation only.
+- Do not patch D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, Web Automation, backend code, or reference framework files.
+- Apply the smallest evidence-backed patch inside the selected generated client framework root.
+- Prefer stable selectors, explicit waits for real state, correct imports, correct data keys, and tool-native patterns.
+- Do not hide instability with arbitrary sleeps, broad fallback selectors, swallowed exceptions, or increased retry counts.
+- Return manual_review when the safe fix requires missing approved data, application behavior changes, environment repair, or unsupported evidence.
+- Healed files are valid for push only after rerun succeeds according to backend run policy.
+
+## Consolidated Legacy Healing Notes
+
+These points were retained from older healing support folders before those folders were removed. Treat them as supporting guidance under the main healing contract above.
+
+From heal\SKILL.md:
+- # SKILL: heal
+- # Purpose: Diagnose broken Android/iOS mobile selectors and return a precise fix.
+- ## INPUT
+- - Failure details and platform.
+- - Failed selector.
+- - Screenshot/page source if available.
+- - Current locator file content.
+- ## HEALING PRIORITY
+- Do not rewrite tests, change screen method names, add sleeps, or replace semantic locators with coordinates unless no alternative exists.
+- ## OUTPUT FORMAT
+
+

@@ -1,0 +1,27 @@
+﻿{
+    "schemaVersion":  1,
+    "skillFolder":  "Cypress_TS_Standard",
+    "tool":  "Cypress",
+    "language":  "TS",
+    "frameworkType":  "Standard",
+    "domain":  "Web Automation",
+    "referenceSkill":  "updateagentskill/playwright/javascript/hybrid",
+    "referencePolicy":  "Use the reference for clarity and contract quality only; preserve this skill folder name, tool behavior, language, framework style, and output paths.",
+    "files":  {
+                  "generation":  "SKILL.md",
+                  "healing":  "HEALING.md",
+                  "contract":  "SKILL_CONTRACT.md"
+              },
+    "rules":  [
+                  "Use only explicitly selected and approved input from the user or backend request.",
+                  "Do not invoke or modify TestCaseGeneration-Skills from automation-script skills.",
+                  "Do not output local absolute paths such as D:\\skills or D:\\frameworks as generated client paths.",
+                  "Generated output must stay inside the selected client framework root.",
+                  "Keep runtime secrets and environment values outside generated source code.",
+                  "Healing may patch generated client files only and should require rerun evidence before push."
+              ],
+    "staticFrameworkRunCommand":  "npx cypress run",
+    "staticFrameworkTestPattern":  "cypress/e2e/**/*.cy.ts",
+    "confidenceTarget":  "90-95 after sample generation and run automation validation against mapped static framework.",
+    "staticFrameworkPath":  "cypress/typescript/standard"
+}

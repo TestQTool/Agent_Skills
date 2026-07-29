@@ -1,4 +1,4 @@
----
+﻿---
 name: RobotFramework_Python_CustomKeywords
 description: Generate RobotFramework Python Customkeywords automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation against the matching static framework; never use this skill to create test cases or invent business scenarios.
 ---
@@ -25,7 +25,7 @@ Use only data present in the selected approved test cases. Do not invent URLs, u
 
 ## Target Output Contract
 
-The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `updatewebautomation/`.
+The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `Web Automation/`.
 
 Generated files must target the selected client framework root from the request, or paths relative to that selected root.
 
@@ -103,3 +103,164 @@ Return `ready` only when:
 7. The framework's list/compile/smoke command can run after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors, mobile elements, API examples, or assertion states are unverified. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
+
+## Qentrix Standard Generation Contract
+
+This skill folder is RobotFramework_Python_CustomKeywords for Robot Framework / Python / Custom Keywords. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this skill's own tool, language, framework type, folder name, and output conventions.
+
+- Generate automation only from explicitly selected approved input.
+- Do not create or change business test cases.
+- Do not invoke TestCaseGeneration-Skills.
+- Do not output local paths under D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, or Web Automation.
+- Keep generated output inside the selected client framework root.
+- Do not hardcode runtime URLs, credentials, tokens, or copied secrets in generated source files.
+- Ensure every generated test has the page, object, fixture, step, helper, and test-data dependencies it imports or calls.
+
+## Matching Static Framework Contract
+
+Mapped updated static framework: D:\frameworks\StaticFrameworks\Web Automation\robotframework\python\custom-keywords
+
+- Run command: robot tests
+- Test pattern: tests/**/*.robot
+- Generated output must follow this mapped framework structure and file zones.
+- Use Playwright JavaScript Hybrid as quality reference only; this mapped framework is the source of truth for paths, runner commands, dependencies, and language syntax.
+- Do not generate files for another framework path unless the user explicitly changes the selected tool/language/framework combination.
+
+## Consolidated Legacy Generation Notes
+
+These points were retained from older support folders before those folders were removed. Treat them as supporting guidance under the main skill contract above.
+
+From build-scripts\SKILL.md:
+- # Robot Framework Python Build Scripts Skill
+- # Purpose: Convert approved test cases into runnable Robot Framework Python Python Custom Keywords files.
+- ## Role
+- Generate production-ready automation for a user-owned repository. The output must plug into the static `robotframework-python-custom-keywords` framework and run on the user's ma...
+- ## Inputs You May Receive
+- - Selected feature or requirement name
+- - Approved manual test cases and steps
+- - Application context
+- - Framework memory from `CLAUDE.md`
+- - Coding standards from `standards/robotframework-python-custom-keywords-standards.md`
+- - Static framework context from `StaticFrameworks/robotframework-python-custom-keywords`
+- - Existing target repository files
+- - Exploration notes/selectors, if available
+- ## Output Contract
+
+From docs\app-context.md:
+- # Application Context Template
+- ## Environments
+- ## Authentication
+- ## User Roles
+- ## Application Modules
+- ## Known Behaviors
+- ## Expected Local Run
+
+From docs\onboarding-guide.md:
+- # Robot Framework Python Python Custom Keywords Agent Skills - Onboarding Guide
+- ## Skill Set
+- ## Recommended Read Order
+- 1. `CLAUDE.md`
+- 2. `docs/onboarding-guide.md`
+- 3. `docs/app-context.md`
+- 4. `standards/robotframework-python-custom-keywords-standards.md`
+- 5. `build-scripts/SKILL.md`
+- 6. `run-ready-framework/SKILL.md`
+- 7. GitHub workflow skill, when repository operations are required
+- 8. Static framework files from `StaticFrameworks/robotframework-python-custom-keywords`
+- 9. Approved test cases, exploration findings, and existing target repo files
+- ## Expected User Outcome
+- ## Repository Split
+
+From explore\SKILL.md:
+- # Robot Framework Python Explore Skill
+- ## Role
+- ## Modes
+- ### Module Discovery
+- Use when a user asks to explore a module broadly. Capture navigation, pages/states, forms, tables, filters, buttons, dialogs, messages, selector candidates, positive/negative/ed...
+- ### Test-Case-Guided Exploration
+- Use when approved test cases already exist and selector accuracy is needed. Follow selected test-case steps exactly and capture selectors for each action plus assertion targets ...
+- ## Selector Priority
+- 1. Stable ids.
+- 2. Accessibility labels, roles, names, and visible labels.
+- 3. Stable semantic attributes such as data-testid, name, type, placeholder, title.
+- 4. Readable dynamic XPath based on labels, text, stable attributes, parent/child, or sibling relationships.
+- 5. Stable CSS classes.
+- 6. Exact text or positional selectors only as last resort.
+
+From generate-tests\SKILL.md:
+- # SKILL: generate-tests
+- # Purpose: Generate exactly 30 structured, non-duplicate manual test cases for ADO and Jira requirements.
+- ## YOUR ROLE
+- ## STRICT RULES
+- 1. Generate EXACTLY 30 test cases.
+- 2. Every title starts with `Verify that ...`.
+- 3. Every test case contains TYPE, PRIORITY, TAGS, TESTCASE, and 4 to 5 STEPS.
+- 4. Allowed TYPE values: FUNCTIONAL_POSITIVE, FUNCTIONAL_NEGATIVE, FUNCTIONAL_EDGE, FUNCTIONAL_API, NON_FUNCTIONAL_PERFORMANCE, NON_FUNCTIONAL_SECURITY.
+- 5. Allowed PRIORITY values: High, Medium, Low.
+- 6. Allowed TAGS values: Smoke, Regression, API, Security, Performance.
+- 7. STEP FORMAT: `STEP: action -> expected result`.
+- 8. Do not use Markdown in generated test-case output.
+- 9. Output plain text only.
+- 10. Do not include selectors, DOM structure, automation APIs, backend classes, database details, or tool internals.
+
+From run-ready-framework\SKILL.md:
+- # Run-Ready Framework Skill
+- # Purpose: Ensure generated automation output is a complete robotframework-python-custom-keywords framework that users can clone and run locally.
+- ## Role
+- ## Required Runtime Files
+- ## Merge Rules
+- 1. Copy missing static framework files from `StaticFrameworks/robotframework-python-custom-keywords`.
+- 2. Preserve user files unless they are known generated framework files.
+- 3. Overlay generated feature files from `build-scripts`.
+- 4. Merge dependency/config/wiring files instead of replacing unrelated content.
+- 5. Never push prompt files, Agent_Skills internals, tokens, local absolute paths, or backend-only configuration.
+- ## Local Run Acceptance Criteria
+- ## Output Contract
+- Return strict JSON only:
+
+From standards\robotframework-python-custom-keywords-standards.md:
+- # Robot Framework Python Python Custom Keywords Coding Standards
+- ## File Outputs Per Feature
+- ## Locator / Selector Rules
+- - Locator files contain selectors only.
+- - Do not place WebDriver/browser calls, assertions, waits, or business logic in locator files.
+- - Group selectors by page area: headings, inputs, buttons, messages, tables, modals, navigation.
+- - Prefer stable ids, accessibility labels, names, test ids, semantic attributes, readable dynamic XPath, then stable CSS.
+- - Avoid absolute XPath, generated class names, blind positional selectors, and brittle text-only selectors unless no alternative exists.
+- - Mark inferred selectors with `TODO: verify selector against live app`.
+- ## Page / Keyword Rules
+- - Page or keyword files contain interactions, waits, and assertions.
+- - Use framework helper methods instead of low-level driver calls when helpers exist.
+- - One method should represent one user action or one assertion.
+- - Credentials must come from role-based helpers or environment-backed test data.
+
+From templates\test-case-template.md:
+- # Test Case Template - Generic Web Application
+- ## Test Case Format
+- ## TC-[MODULE_PREFIX]-[NUMBER]: [Test Title]
+- ### Description
+- ### Preconditions
+- - [ ] User has access to the target environment
+- - [ ] Required test data exists or can be created during the test
+- - [ ] Required role/permission is available
+- ### Test Steps
+- ### Expected Final Result
+- ## Coverage Checklist
+
+From CLAUDE.md:
+- # QA Automation - Robot Framework Python Python Custom Keywords Project Memory
+- ## Goal
+- Generate a self-contained `robotframework-python-custom-keywords` web automation framework that a user can clone, install, configure, and run locally or in CI.
+- ## Runtime Layout
+- ## Framework Architecture
+- ## Generated Files Per Feature
+- - `resources/locators/<feature>_locators.py`: locators/selectors only.
+- - `libraries/<feature>_keywords.py`: page actions, waits, data helpers, and assertions.
+- - `tests/<feature>.robot`: test orchestration only.
+- - Framework wiring files are updated only when needed and must preserve existing content.
+- ## Coding Standards
+- - Keep locators/selectors out of tests.
+- - Keep assertions out of BDD step definitions when this stack uses BDD.
+- - Use role-based credentials and environment-driven configuration.
+
+

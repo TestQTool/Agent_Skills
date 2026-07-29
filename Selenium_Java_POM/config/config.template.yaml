@@ -1,9 +1,0 @@
-# Selenium Java Page Object Model Framework Config Template
-
-project: selenium-java-pom
-base_url: ${BASE_URL}
-browser: chrome
-headless: false
-default_role: Admin
-default_suite: smoke
-run_command: "mvn test"

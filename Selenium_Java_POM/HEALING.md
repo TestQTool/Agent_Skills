@@ -1,4 +1,4 @@
-# Selenium Java POM Run Healing
+﻿# Selenium Java POM Run Healing
 
 Use this file when generated `Selenium_Java_POM` automation fails during Run Automation. These rules repair generated client automation only. They do not create new business test cases and they do not modify reference framework files.
 
@@ -103,3 +103,47 @@ A heal is complete only when:
 3. The same script/spec/scenario is rerun in the isolated workspace.
 4. The rerun passes.
 5. Only then are healed files pushed to the selected generated branch.
+
+## Qentrix Standard Healing Contract
+
+This healing file is for Selenium_Java_POM using Selenium / Java / POM. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this tool's own repair patterns and generated file zones.
+
+- Heal generated client automation only.
+- Do not patch D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, Web Automation, backend code, or reference framework files.
+- Apply the smallest evidence-backed patch inside the selected generated client framework root.
+- Prefer stable selectors, explicit waits for real state, correct imports, correct data keys, and tool-native patterns.
+- Do not hide instability with arbitrary sleeps, broad fallback selectors, swallowed exceptions, or increased retry counts.
+- Return manual_review when the safe fix requires missing approved data, application behavior changes, environment repair, or unsupported evidence.
+- Healed files are valid for push only after rerun succeeds according to backend run policy.
+
+## Matching Static Framework Healing Boundary
+
+Mapped updated static framework: D:\frameworks\StaticFrameworks\Web Automation\selenium\java\pom
+
+- Run command: mvn test
+- Test pattern: src/test/java/**/*Test.java
+- Generated output must follow this mapped framework structure and file zones.
+- Use Playwright JavaScript Hybrid as quality reference only; this mapped framework is the source of truth for paths, runner commands, dependencies, and language syntax.
+- Do not generate files for another framework path unless the user explicitly changes the selected tool/language/framework combination.
+
+## Consolidated Legacy Healing Notes
+
+These points were retained from older healing support folders before those folders were removed. Treat them as supporting guidance under the main healing contract above.
+
+From heal\SKILL.md:
+- # SKILL: heal
+- # Purpose: Diagnose broken Selenium selectors and return a precise locator fix.
+- ## YOUR ROLE
+- ## INPUT YOU WILL RECEIVE
+- - failureDetails: error message and stack trace
+- - errorContext.testName
+- - errorContext.failedLine
+- - errorContext.selector
+- - errorContext.screenshot, if available
+- - Current locator file content
+- ## DIAGNOSIS
+- ## HEALING PRIORITY
+- 1. Stable id.
+- 2. Accessibility/label selector.
+
+

@@ -1,4 +1,4 @@
----
+﻿---
 name: GitHub_PR_Raise_Review
 description: Generate GitHub Workflow Workflow Pr Raise Review automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation against the matching static framework; never use this skill to create test cases or invent business scenarios.
 ---
@@ -25,7 +25,7 @@ Use only data present in the selected approved test cases. Do not invent URLs, u
 
 ## Target Output Contract
 
-The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `updatewebautomation/`.
+The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `Web Automation/`.
 
 Generated files must target the selected client framework root from the request, or paths relative to that selected root.
 
@@ -101,3 +101,19 @@ Return `ready` only when:
 7. The framework's list/compile/smoke command can run after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors, mobile elements, API examples, or assertion states are unverified. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
+
+## Qentrix Standard Generation Contract
+
+This skill folder is GitHub_PR_Raise_Review for GitHub / Unspecified / PR Raise Review. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this skill's own tool, language, framework type, folder name, and output conventions.
+
+- Generate automation only from explicitly selected approved input.
+- Do not create or change business test cases.
+- Do not invoke TestCaseGeneration-Skills.
+- Do not output local paths under D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, or Web Automation.
+- Keep generated output inside the selected client framework root.
+- Do not hardcode runtime URLs, credentials, tokens, or copied secrets in generated source files.
+- Ensure every generated test has the page, object, fixture, step, helper, and test-data dependencies it imports or calls.
+
+
+
+

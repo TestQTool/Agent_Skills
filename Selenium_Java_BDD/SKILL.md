@@ -1,4 +1,4 @@
----
+﻿---
 name: Selenium_Java_BDD
 description: Generate Selenium Java BDD automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation against the matching static framework; never use this skill to create test cases or invent business scenarios.
 ---
@@ -25,7 +25,7 @@ Use only data present in the selected approved test cases. Do not invent URLs, u
 
 ## Target Output Contract
 
-The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `updatewebautomation/`.
+The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `Web Automation/`.
 
 Generated files must target the selected client framework root from the request, or paths relative to that selected root.
 
@@ -103,3 +103,199 @@ Return `ready` only when:
 7. The framework's list/compile/smoke command can run after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors, mobile elements, API examples, or assertion states are unverified. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
+
+## Qentrix Standard Generation Contract
+
+This skill folder is Selenium_Java_BDD for Selenium / Java / BDD Cucumber. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this skill's own tool, language, framework type, folder name, and output conventions.
+
+- Generate automation only from explicitly selected approved input.
+- Do not create or change business test cases.
+- Do not invoke TestCaseGeneration-Skills.
+- Do not output local paths under D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, or Web Automation.
+- Keep generated output inside the selected client framework root.
+- Do not hardcode runtime URLs, credentials, tokens, or copied secrets in generated source files.
+- Ensure every generated test has the page, object, fixture, step, helper, and test-data dependencies it imports or calls.
+
+## Matching Static Framework Contract
+
+Mapped updated static framework: D:\frameworks\StaticFrameworks\Web Automation\selenium\java\bdd
+
+- Run command: mvn test
+- Test pattern: src/test/java/features/**/*.feature
+- Generated output must follow this mapped framework structure and file zones.
+- Use Playwright JavaScript Hybrid as quality reference only; this mapped framework is the source of truth for paths, runner commands, dependencies, and language syntax.
+- Do not generate files for another framework path unless the user explicitly changes the selected tool/language/framework combination.
+
+## Consolidated Legacy Generation Notes
+
+These points were retained from older support folders before those folders were removed. Treat them as supporting guidance under the main skill contract above.
+
+From build-scripts\SKILL.md:
+- # Skill: Build Scripts Ã¢â‚¬â€ Run Tests and Interpret Results
+- ## When to use this skill
+- ## Run Commands
+- # Install (first time or after pom.xml changes)
+- # Run all tests
+- # Run smoke suite
+- # Run regression suite
+- # Run by tag
+- # Run on specific browser
+- # Run with specific environment
+- # Generate Allure report
+- ## CI Overrides (ADO Pipeline / GitHub Actions)
+- # azure-pipelines.yml example task
+- - task: Maven@3
+
+From explore\SKILL.md:
+- # Skill: Explore Ã¢â‚¬â€ Discover Locators and Map App Structure
+- ## When to use this skill
+- ## Goal
+- ## Step-by-Step Process
+- ### Step 1 Ã¢â‚¬â€ Read app context
+- ### Step 2 Ã¢â‚¬â€ Navigate and inspect
+- 1. `By.id("...")` Ã¢â‚¬â€ most stable, prefer always
+- 2. `By.cssSelector("[data-testid='...']")` Ã¢â‚¬â€ second best
+- 3. `By.cssSelector("[name='...']")` Ã¢â‚¬â€ for form inputs
+- 4. `By.cssSelector("[aria-label='...']")` Ã¢â‚¬â€ for accessibility-labeled elements
+- 5. `By.cssSelector(".class-name")` Ã¢â‚¬â€ only if class is stable (not generated)
+- 6. `By.xpath("//tag[@attr='val']")` Ã¢â‚¬â€ last resort
+- 7. NEVER: `By.xpath("/html/body/div[3]/div[2]/...")` Ã¢â‚¬â€ absolute XPath is forbidden
+- ### Step 3 Ã¢â‚¬â€ Group locators by UI section
+
+From generate-tests\SKILL.md:
+- # Skill: Generate Tests Ã¢â‚¬â€ Convert Work Items to BDD Scripts
+- ## When to use this skill
+- ## Input the Agent Expects
+- - ADO Test Case(s) with title, steps, expected results
+- - User Story with acceptance criteria
+- - Manual test case document
+- - Feature name + list of scenarios to automate
+- ## Generation Process (follow in order)
+- ### Step 1 Ã¢â‚¬â€ Read standards
+- ### Step 2 Ã¢â‚¬â€ Read app context
+- ### Step 3 Ã¢â‚¬â€ Read template files from static framework
+- - `pageObjects/_TemplatePageObjects.java`
+- - `pages/_TemplatePage.java`
+- - `src/test/java/stepDefinitions/_TemplateSteps.java`
+
+From review\SKILL.md:
+- # Skill: Review Ã¢â‚¬â€ PR Review for BDD Layer Compliance
+- ## When to use this skill
+- ## Review Checklist
+- ### Layer 1 Ã¢â‚¬â€ pageObjects/\<Feature\>PageObjects.java
+- - [ ] Only `public static final By` fields Ã¢â‚¬â€ no methods, no logic
+- - [ ] Only import is `import org.openqa.selenium.By;`
+- - [ ] All constants are `UPPER_SNAKE_CASE`
+- - [ ] Sections present: Page Heading, Form Inputs, Buttons, Messages, Table, Modal
+- - [ ] UNVERIFIED section at bottom for unconfirmed locators
+- - [ ] No absolute XPath (`/html/body/div[3]/...`)
+- - [ ] No generated class names (`.css-xk3d2f`) without `// Ã¢Å¡Â  UNSTABLE` comment
+- ### Layer 2 Ã¢â‚¬â€ pages/\<Feature\>Page.java
+- - [ ] Extends `BasePage`
+- - [ ] Constructor takes `WebDriver driver` only
+
+From standards\bdd-standards.md:
+- # BDD Standards Ã¢â‚¬â€ Selenium Java BDD
+- must be followed during generation (generate-tests/SKILL.md).
+- ## Layer Rules (strict Ã¢â‚¬â€ violations block PR merge)
+- ### Layer 1 Ã¢â‚¬â€ pageObjects/\<Feature\>PageObjects.java
+- - ONLY `public static final By` fields
+- - ONLY import: `import org.openqa.selenium.By;`
+- - Zero methods. Zero constructors. Zero logic.
+- - Grouped by section comments:
+- - UNVERIFIED section at the bottom for AI-generated stubs not yet verified on live app
+- ### Layer 2 Ã¢â‚¬â€ pages/\<Feature\>Page.java
+- - Extends `BasePage`
+- - Imports locators from `<Feature>PageObjects` ONLY
+- - Constructor: `public <Feature>Page(WebDriver driver) { super(driver); }`
+- - Methods grouped:
+
+From templates\test-case-template.md:
+- # Test Case Ã¢â€ â€™ Gherkin Mapping Template
+- Use this template when converting ADO/Jira test cases into BDD scenarios.
+- ## ADO Test Case Structure Ã¢â€ â€™ Gherkin Mapping
+- ## Template: Single Happy Path Scenario
+- ## Template: Negative / Validation Scenario
+- ## Template: Data-Driven Scenario Outline
+- ## Template: Feature with Background
+- ## Step Naming Conventions
+
+From app-context.md:
+- # App Context Ã¢â‚¬â€ Client Application
+- ## Application Details
+- ## Roles and Credentials
+- Use `getLoginDataByRole("Admin")` Ã¢â‚¬â€ never hardcode.
+- ## Key Modules / Feature Areas
+- ## Known Quirks
+- - Document any dynamic class names, random IDs, or timing issues here
+- - Note any pages that need `waitForNetworkIdle()` instead of `waitForPageLoad()`
+- - Note any modules with iFrame wrappers
+
+From CLAUDE.md:
+- # Selenium Java BDD Ã¢â‚¬â€ Agent Entry Point
+- ## What You Do
+- 1. `pageObjects/<Feature>PageObjects.java`  Ã¢â‚¬â€ Selenium By locators only
+- 2. `pages/<Feature>Page.java`              Ã¢â‚¬â€ Actions + Assertions (extends BasePage)
+- 3. `stepDefinitions/<Feature>Steps.java`   Ã¢â‚¬â€ Given/When/Then (thin, calls page methods)
+- 4. `features/<Feature>.feature`            Ã¢â‚¬â€ Gherkin scenarios (business language)
+- ## Skill Router
+- Always read the relevant skill BEFORE writing any code.
+- ## Non-Negotiable Rules (memorize these)
+- 1. Locators live ONLY in `pageObjects/` Ã¢â‚¬â€ never inline in steps or page classes
+- 2. Assertions live ONLY in `pages/` Ã¢â‚¬â€ never in step definitions
+- 3. Step definitions are THIN Ã¢â‚¬â€ one page method call per step
+- 4. Gherkin uses BUSINESS LANGUAGE Ã¢â‚¬â€ no technical details like "click button#submit"
+- 5. Every scenario tagged with `@smoke` OR `@regression` AND `@TC-XXX-NNN`
+
+From onboarding-guide.md:
+- # Onboarding Guide Ã¢â‚¬â€ Selenium Java BDD
+- ## Prerequisites
+- ## Step 1 Ã¢â‚¬â€ Clone the Static Framework into Client Repo
+- # Clone StaticFrameworks
+- # Copy the BDD framework to your client project
+- ## Step 2 Ã¢â‚¬â€ Configure
+- # Copy env template
+- # Edit config
+- ## Step 3 Ã¢â‚¬â€ Install
+- ## Step 4 Ã¢â‚¬â€ Run
+- # All tests
+- # Smoke only
+- # Regression only
+- # Specific feature tag
+
+
+## Consolidated Root Legacy Notes
+
+These root-level legacy notes were retained before old helper files were removed.
+
+From app-context.md:
+- # App Context Ã¢â‚¬â€ Client Application
+- ## Application Details
+- ## Roles and Credentials
+- Use `getLoginDataByRole("Admin")` Ã¢â‚¬â€ never hardcode.
+- ## Key Modules / Feature Areas
+- ## Known Quirks
+- - Document any dynamic class names, random IDs, or timing issues here
+- - Note any pages that need `waitForNetworkIdle()` instead of `waitForPageLoad()`
+- - Note any modules with iFrame wrappers
+
+From claude.json:
+- Legacy file reviewed; no concise rule lines were found to preserve.
+
+From onboarding-guide.md:
+- # Onboarding Guide Ã¢â‚¬â€ Selenium Java BDD
+- ## Prerequisites
+- ## Step 1 Ã¢â‚¬â€ Clone the Static Framework into Client Repo
+- # Clone StaticFrameworks
+- # Copy the BDD framework to your client project
+- ## Step 2 Ã¢â‚¬â€ Configure
+- # Copy env template
+- # Edit config
+- ## Step 3 Ã¢â‚¬â€ Install
+- ## Step 4 Ã¢â‚¬â€ Run
+- # All tests
+- # Smoke only
+- # Regression only
+- # Specific feature tag
+
+

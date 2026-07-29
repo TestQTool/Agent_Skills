@@ -1,4 +1,4 @@
----
+﻿---
 name: Appium_CSharp_BDD
 description: Generate Appium C# BDD automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation against the matching static framework; never use this skill to create test cases or invent business scenarios.
 ---
@@ -25,7 +25,7 @@ Use only data present in the selected approved test cases. Do not invent URLs, u
 
 ## Target Output Contract
 
-The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `updatewebautomation/`.
+The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `Web Automation/`.
 
 Generated files must target the selected client framework root from the request, or paths relative to that selected root.
 
@@ -101,3 +101,152 @@ Return `ready` only when:
 7. The framework's list/compile/smoke command can run after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors, mobile elements, API examples, or assertion states are unverified. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
+
+## Qentrix Standard Generation Contract
+
+This skill folder is Appium_CSharp_BDD for Appium / C# / BDD Cucumber. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this skill's own tool, language, framework type, folder name, and output conventions.
+
+- Generate automation only from explicitly selected approved input.
+- Do not create or change business test cases.
+- Do not invoke TestCaseGeneration-Skills.
+- Do not output local paths under D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, or Web Automation.
+- Keep generated output inside the selected client framework root.
+- Do not hardcode runtime URLs, credentials, tokens, or copied secrets in generated source files.
+- Ensure every generated test has the page, object, fixture, step, helper, and test-data dependencies it imports or calls.
+
+## Consolidated Legacy Generation Notes
+
+These points were retained from older support folders before those folders were removed. Treat them as supporting guidance under the main skill contract above.
+
+From build-scripts\SKILL.md:
+- # Appium C# Mobile Build Scripts Skill
+- ## Role
+- ## Inputs
+- - Approved mobile test cases
+- - App context with Android appPackage/appActivity and iOS bundleId
+- - Device/capability config
+- - Exploration findings with Android/iOS selectors, if available
+- - Existing target repository files
+- ## Output Contract
+- Return strict JSON only:
+- ## Generation Rules
+- - Generate Android and iOS capabilities/config entries.
+- - Generate platform-aware locators when selectors differ.
+- - Use accessibility ids first.
+
+From docs\app-context.md:
+- # Mobile Application Context Template
+- ## Applications
+- ## Environments
+- ## Devices
+- ## Authentication
+- ## Modules
+- ## Known Mobile Behaviors
+
+From docs\onboarding-guide.md:
+- # Appium C# BDD Framework Mobile Onboarding Guide
+- ## Skill Set
+- ## Required Mobile Setup
+- - Appium server available locally or in CI/cloud.
+- - Android SDK/emulator or connected Android device.
+- - Xcode/iOS simulator or connected iOS device for iOS execution.
+- - App artifacts or installed-app identifiers configured without hardcoded local paths.
+- ## Expected Commands
+- ## Safety Rules
+- - Use environment variables for app paths, cloud credentials, device ids, and server URL.
+- - Keep platform capabilities in config files.
+- - Keep locators platform-aware.
+- - Capture permission alerts and native/webview context switching rules in app context.
+
+From explore\SKILL.md:
+- # Mobile Explore Skill
+- ## Modes
+- 1. Module discovery: map screens, navigation, gestures, permissions, validations, offline states, and platform differences.
+- 2. Test-case-guided exploration: follow selected test cases and capture verified Android/iOS locators and assertions per step.
+- ## Capture
+- - Platform, device, OS version, app identifier, app state.
+- - Android selectors: accessibility id, resource-id, UiAutomator, XPath fallback.
+- - iOS selectors: accessibility id/name, predicate, class chain, XPath fallback.
+- - Gestures: tap, long press, swipe, scroll, drag/drop, hide keyboard.
+- - Native alerts, permission dialogs, webview/native context switches.
+- - Screenshots and gaps.
+- ## Output
+- Return JSON with pages, elements, Android/iOS selector candidates, recommended selector, wait condition, gesture needed, assertions, business rules, data dependencies, and block...
+
+From generate-tests\SKILL.md:
+- # SKILL: generate-tests
+- # Purpose: Generate exactly 30 structured, non-duplicate mobile test cases.
+- ## YOUR ROLE
+- Generate EXACTLY 30 unique mobile test cases for Android and iOS coverage where applicable. Cover positive, negative, edge, interruption, permission, offline, orientation, acces...
+- ## STRICT RULES
+- 1. Generate EXACTLY 30 test cases.
+- 2. Every title starts with `Verify that ...`.
+- 3. Every test case contains TYPE, PRIORITY, TAGS, TESTCASE, and 4 to 5 STEPS.
+- 4. Allowed TYPE values: FUNCTIONAL_POSITIVE, FUNCTIONAL_NEGATIVE, FUNCTIONAL_EDGE, MOBILE_PERMISSION, MOBILE_INTERRUPTION, NON_FUNCTIONAL_PERFORMANCE, NON_FUNCTIONAL_SECURITY.
+- 5. Allowed PRIORITY values: High, Medium, Low.
+- 6. Allowed TAGS values: Smoke, Regression, Android, iOS, Security, Performance.
+- 7. STEP FORMAT: `STEP: action -> expected result`.
+- 8. Output plain text only.
+- 9. Do not include locators, automation APIs, DOM hierarchy, device UDIDs, app paths, or secrets.
+
+From run-ready-framework\SKILL.md:
+- # Run-Ready Mobile Framework Skill
+- ## Role
+- ## Required Runtime Files
+- ## Verification
+- - Android capabilities are present and environment-driven.
+- - iOS capabilities are present and environment-driven.
+- - Appium server URL is configurable.
+- - Device identifiers, app paths, and cloud credentials are not committed.
+- - Tests can select platform from CLI/env/config.
+- - Reports/screenshots/logs are written to a reports folder.
+- ## Acceptance Commands
+- ## Output Contract
+- Return strict JSON only:
+
+From standards\appium-csharp-bdd-standards.md:
+- # Appium C# BDD Framework Mobile Standards
+- ## File Outputs Per Feature
+- ## Locator Rules
+- - Locator files contain selectors only.
+- - Store Android and iOS locators separately when they differ.
+- - Prefer accessibility id/content-desc/name on both platforms.
+- - Android fallback priority: accessibility id, resource-id, UiAutomator text/description, XPath last.
+- - iOS fallback priority: accessibility id/name, iOS predicate, iOS class chain, XPath last.
+- - Never use brittle absolute XPath or coordinate-only locators as the default.
+- ## Screen/Page Rules
+- - Screen files contain actions, waits, gestures, assertions, and platform locator resolution.
+- - Use helper methods for tap, type, swipe, scroll, long press, hide keyboard, context switch, permission handling, and app reset.
+- - Assertions must wait for stable mobile state before reading text or visibility.
+- ## Test Rules
+
+From templates\test-case-template.md:
+- # Mobile Test Case Template
+- ## Test Case Format
+- ## TC-MOB-[NUMBER]: [Test Title]
+- ### Preconditions
+- - App installed or app artifact available.
+- - Device/simulator is available.
+- - Required permissions and test data are configured.
+- ### Test Steps
+- ### Platform Notes
+- - Android:
+- - iOS:
+
+From CLAUDE.md:
+- # Mobile Automation - Appium C# BDD Framework Project Memory
+- ## Goal
+- Generate a self-contained `appium-csharp-bdd` mobile automation framework that supports both Android and iOS.
+- ## Runtime Layout
+- ## Android And iOS Requirements
+- - Android capabilities must support `platformName=Android`, `automationName=UiAutomator2`, `appPackage`, `appActivity`, `deviceName`, and app path or installed app mode.
+- - iOS capabilities must support `platformName=iOS`, `automationName=XCUITest`, `bundleId`, `udid/deviceName`, `platformVersion`, and app path or installed app mode.
+- - Tests must allow platform selection by CLI/env/config.
+- - Locators must be platform-aware when Android and iOS accessibility trees differ.
+- - Prefer accessibility ids on both platforms. Use Android UIAutomator and iOS predicate/class chain only when accessibility ids are unavailable.
+- - Mobile gestures must be helper methods: tap, long press, swipe, scroll, hide keyboard, context switch, wait for app state.
+- ## Generated Files Per Feature
+- - `PageObjects/<Feature>MobileObjects.cs`: Android and iOS locators/selectors only.
+- - `Screens/<Feature>Screen.cs`: screen actions, waits, gestures, and assertions.
+
+

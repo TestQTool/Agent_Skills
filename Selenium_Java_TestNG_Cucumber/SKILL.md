@@ -1,4 +1,4 @@
----
+﻿---
 name: Selenium_Java_TestNG_Cucumber
 description: Generate Selenium Java TestNG Cucumber automation from explicitly selected, approved test cases. Use for Qentrix automation-script generation against the matching static framework; never use this skill to create test cases or invent business scenarios.
 ---
@@ -25,7 +25,7 @@ Use only data present in the selected approved test cases. Do not invent URLs, u
 
 ## Target Output Contract
 
-The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `updatewebautomation/`.
+The static framework path is reference context only. Do not output paths beginning with `Agent_Skills/`, `StaticFrameworks/`, `Web Automation/`, `updateagentskill/`, or `Web Automation/`.
 
 Generated files must target the selected client framework root from the request, or paths relative to that selected root.
 
@@ -103,3 +103,137 @@ Return `ready` only when:
 7. The framework's list/compile/smoke command can run after applying operations.
 
 Return `needs_exploration` when behavior is complete but selectors, mobile elements, API examples, or assertion states are unverified. Return `blocked` only when required approved steps, expectations, routes, safe data references, or framework files are missing so badly that runnable feature files cannot be produced.
+
+## Qentrix Standard Generation Contract
+
+This skill folder is Selenium_Java_TestNG_Cucumber for Selenium / Java / TestNG. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this skill's own tool, language, framework type, folder name, and output conventions.
+
+- Generate automation only from explicitly selected approved input.
+- Do not create or change business test cases.
+- Do not invoke TestCaseGeneration-Skills.
+- Do not output local paths under D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, or Web Automation.
+- Keep generated output inside the selected client framework root.
+- Do not hardcode runtime URLs, credentials, tokens, or copied secrets in generated source files.
+- Ensure every generated test has the page, object, fixture, step, helper, and test-data dependencies it imports or calls.
+
+## Matching Static Framework Contract
+
+Mapped updated static framework: D:\frameworks\StaticFrameworks\Web Automation\selenium\java\bdd
+
+- Run command: mvn test
+- Test pattern: src/test/java/features/**/*.feature
+- Generated output must follow this mapped framework structure and file zones.
+- Use Playwright JavaScript Hybrid as quality reference only; this mapped framework is the source of truth for paths, runner commands, dependencies, and language syntax.
+- Do not generate files for another framework path unless the user explicitly changes the selected tool/language/framework combination.
+
+## Consolidated Legacy Generation Notes
+
+These points were retained from older support folders before those folders were removed. Treat them as supporting guidance under the main skill contract above.
+
+From build-scripts\SKILL.md:
+- # Build Scripts Skill - Selenium Java TestNG + Cucumber BDD
+- ## Role
+- ## Output Contract
+- Return strict JSON only:
+- ## Rules
+- - JSON only.
+- - Preserve existing files when supplied.
+- - Add TestNG groups and DataProviders without removing existing coverage.
+- - Do not hardcode credentials, tokens, local paths, device IDs, or app paths.
+- - Do not put selectors/endpoints inside TestNG test classes.
+- - Every test method must include TC-ID and a TestNG group.
+
+From docs\app-context.md:
+- # Application Context Template
+- ## Domain
+- ## Environments
+- ## Authentication
+- ## Modules
+- ## Known Behaviors
+
+From docs\onboarding-guide.md:
+- # Selenium Java TestNG + Cucumber BDD Onboarding Guide
+- ## Skill Set
+- ## Expected Command
+- ## Safety
+- - Do not hardcode credentials, tokens, device IDs, app paths, or local absolute paths.
+- - Preserve existing `pom.xml`, `testng.xml`, listeners, and framework base classes.
+- - Add TestNG groups and DataProviders without removing existing tests.
+
+From explore\SKILL.md:
+- # Explore Skill
+- ## Capture
+- - Feature/module scope.
+- - Selectors, endpoints, or mobile locators.
+- - Positive/negative/edge flows.
+- - Assertion targets and expected states.
+- - Test data dependencies.
+- - Platform-specific details when mobile.
+- - Gaps and blockers.
+- ## Output
+- Prefer strict JSON with summary, elements/endpoints, flows, assertions, dataDependencies, and gaps.
+
+From generate-tests\SKILL.md:
+- # SKILL: generate-tests
+- Generate EXACTLY 30 structured, non-duplicate test cases. Output plain text only.
+- ## Rules
+- 1. Every title starts with `Verify that ...`.
+- 2. Include TYPE, PRIORITY, TAGS, TESTCASE, and 4 to 5 STEPS.
+- 3. Allowed TYPE values: FUNCTIONAL_POSITIVE, FUNCTIONAL_NEGATIVE, FUNCTIONAL_EDGE, API, SECURITY, PERFORMANCE, MOBILE_PERMISSION, MOBILE_INTERRUPTION.
+- 4. Allowed PRIORITY values: High, Medium, Low.
+- 5. Allowed TAGS values: Smoke, Regression, API, Security, Performance, Android, iOS.
+- 6. STEP FORMAT: `STEP: action -> expected result`.
+- 7. Do not include selectors, source code, backend internals, device IDs, tokens, or local paths.
+- ## Output Example
+
+From run-ready-framework\SKILL.md:
+- # Run-Ready TestNG Framework Skill
+- ## Required Files
+- ## Checks
+- - `pom.xml` includes TestNG and stack dependencies.
+- - `testng.xml` or runner config includes generated tests/groups.
+- - Smoke/regression groups can be selected from CLI.
+- - Reports/listeners are configured.
+- - No secrets, local paths, tokens, device IDs, or app paths are committed.
+- ## Output Contract
+
+From standards\selenium-java-testng-cucumber-standards.md:
+- # Selenium Java TestNG + Cucumber BDD Standards
+- ## File Outputs
+- ## Selector / Endpoint Rules
+- - Object/endpoint files contain selectors or endpoint constants only.
+- - No driver calls, assertions, waits, or business logic in object/endpoint files.
+- - Mark inferred selectors/endpoints with TODO when not verified.
+- ## Page / Screen / Client Rules
+- - Action/client classes own interactions, request construction, waits, and assertions.
+- - Tests call meaningful methods only.
+- - Credentials and environment data come from config or role helpers.
+- ## TestNG Rules
+- - Every test has a TC-ID in method name, description, or annotation.
+- - Every test is grouped as smoke, regression, api, mobile, or platform-specific where appropriate.
+- - Use DataProvider for data variants.
+
+From templates\test-case-template.md:
+- # TestNG Test Case Template
+- ## Test Case Format
+- ## TC-[MODULE]-[NUMBER]: [Test Title]
+- ### Preconditions
+- - Test environment is available.
+- - Required data exists or can be created safely.
+- ### Steps
+
+From CLAUDE.md:
+- # QA Automation - Selenium Java TestNG + Cucumber BDD Project Memory
+- ## Goal
+- Generate a self-contained `selenium-java-testng-cucumber` framework using Java and TestNG for web UI automation.
+- ## Runtime Layout
+- ## TestNG Rules
+- - Use `@Test(groups = {"smoke"})` and `@Test(groups = {"regression"})` for suite selection.
+- - Use `@BeforeMethod` / `@AfterMethod` for test lifecycle unless the static framework has a base class.
+- - Use `@DataProvider` for data-driven tests.
+- - Use listeners for screenshots/logging/reporting, not test-body try/catch clutter.
+- - Keep dependencies and plugin configuration in `pom.xml`.
+- - Keep suite composition in `testng.xml`.
+- ## Runtime Command
+
+

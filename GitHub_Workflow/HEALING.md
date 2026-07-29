@@ -1,4 +1,4 @@
-# GitHub Workflow Workflow Workflow Run Healing
+﻿# GitHub Workflow Workflow Workflow Run Healing
 
 Use this file when generated `GitHub_Workflow` automation fails during Run Automation. These rules repair generated client automation only. They do not create new business test cases and they do not modify reference framework files.
 
@@ -101,3 +101,19 @@ A heal is complete only when:
 3. The same script/spec/scenario is rerun in the isolated workspace.
 4. The rerun passes.
 5. Only then are healed files pushed to the selected generated branch.
+
+## Qentrix Standard Healing Contract
+
+This healing file is for GitHub_Workflow using GitHub / Unspecified / Workflow. Use updateagentskill/playwright/javascript/hybrid as a quality reference only; preserve this tool's own repair patterns and generated file zones.
+
+- Heal generated client automation only.
+- Do not patch D:\skills, D:\frameworks, Agent_Skills, StaticFrameworks, updateagentskill, Web Automation, backend code, or reference framework files.
+- Apply the smallest evidence-backed patch inside the selected generated client framework root.
+- Prefer stable selectors, explicit waits for real state, correct imports, correct data keys, and tool-native patterns.
+- Do not hide instability with arbitrary sleeps, broad fallback selectors, swallowed exceptions, or increased retry counts.
+- Return manual_review when the safe fix requires missing approved data, application behavior changes, environment repair, or unsupported evidence.
+- Healed files are valid for push only after rerun succeeds according to backend run policy.
+
+
+
+

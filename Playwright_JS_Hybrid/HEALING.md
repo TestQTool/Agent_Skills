@@ -18,6 +18,7 @@ Allowed generated files to patch:
 updatedplaywrightjshybrid/pageObjects/*.js
 updatedplaywrightjshybrid/pages/*.js
 updatedplaywrightjshybrid/tests/*.test.js
+updatedplaywrightjshybrid/fixtures/test.js
 updatedplaywrightjshybrid/test-data/testdata.json
 updatedplaywrightjshybrid/test-data/credentials.csv
 updatedplaywrightjshybrid/.env
@@ -30,13 +31,12 @@ D:\skills\Agent_Skills
 D:\frameworks\StaticFrameworks
 updatedplaywrightjshybrid/pages/BasePage.js
 updatedplaywrightjshybrid/config/**
-updatedplaywrightjshybrid/fixtures/**
 updatedplaywrightjshybrid/utils/**
 updatedplaywrightjshybrid/package.json
 updatedplaywrightjshybrid/playwright.config.js
 ```
 
-Framework-owned support files can be read for context but must not be rewritten during healing unless the user explicitly asks for framework maintenance.
+Framework-owned support files can be read for context but must not be rewritten during healing unless the user explicitly asks for framework maintenance. `fixtures/test.js` is the only support file that may be patched, and only to register missing generated page fixtures or fix generated fixture import/export wiring.
 
 ## Healing Flow
 
@@ -63,6 +63,7 @@ Treat as healable automation defects:
 - Test uses stale generated data from another testcase ID.
 - Test hardcodes URL or credentials that should come from `.env` or test data.
 - Test imports a generated page class with wrong casing or wrong path.
+- Fixture file imports a generated default-export page class as a named import.
 
 Treat as genuine app/test failure and do not heal:
 
@@ -146,6 +147,71 @@ this.locators = new HomePageObjects(page);
 ```
 
 Do not replace this with a broad selector or a fixed wait. This is a wiring defect, not a timing defect.
+
+## Fixture Import/Export Healing Rules
+
+If the failure is similar to:
+
+```text
+Test has unknown parameter "homePage"
+Test has unknown parameter "productPage"
+Test has unknown parameter "cartPage"
+```
+
+patch `updatedplaywrightjshybrid/fixtures/test.js` to register the missing fixtures. Before writing imports, inspect the matching page files in `updatedplaywrightjshybrid/pages/`.
+
+Generated page classes in this framework should be default exports:
+
+```js
+export default class CartPage extends BasePage {
+}
+```
+
+For default-export page classes, fixture imports must be default imports:
+
+```js
+import CartPage from '../pages/CartPage.js';
+```
+
+Do not use named imports unless the page file explicitly contains a named export:
+
+```js
+// Wrong for default-export page files
+import { CartPage } from '../pages/CartPage.js';
+```
+
+Correct fixture registration pattern:
+
+```js
+import { test as base, expect } from '@playwright/test';
+import HomePage from '../pages/HomePage.js';
+import ProductPage from '../pages/ProductPage.js';
+import CartPage from '../pages/CartPage.js';
+
+export const test = base.extend({
+  homePage: async ({ page }, use) => {
+    await use(new HomePage(page));
+  },
+  productPage: async ({ page }, use) => {
+    await use(new ProductPage(page));
+  },
+  cartPage: async ({ page }, use) => {
+    await use(new CartPage(page));
+  }
+});
+
+export { expect };
+```
+
+When patching fixtures, preserve existing valid fixture entries and imports. Do not remove unrelated fixtures needed by other selected scripts in the same run.
+
+If rerun fails with:
+
+```text
+SyntaxError: The requested module '../pages/<Feature>Page.js' does not provide an export named '<Feature>Page'
+```
+
+the repair used the wrong import style. Patch `fixtures/test.js` to use a default import for that page file and rerun.
 
 ## Test Data Healing Rules
 

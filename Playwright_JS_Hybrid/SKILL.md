@@ -101,6 +101,9 @@ Fixture dependency contract:
 
 - If a generated test destructures a fixture such as `async ({ loginPage }) =>`, `fixtures/test.js` must already expose that exact lower-camel-case fixture or the response must include a `registerFixture` operation for it.
 - `registerFixture` must import the page class from `../pages/<Feature>Page.js`, instantiate it with `page`, and preserve all existing fixture imports and entries.
+- Page classes in this framework must use default exports: `export default class FeaturePage extends BasePage`.
+- Fixture imports for page classes must use default imports: `import FeaturePage from '../pages/FeaturePage.js';`.
+- Never use named page-class imports in fixtures, such as `import { FeaturePage } from '../pages/FeaturePage.js';`, unless the page file explicitly exports a named class. Generated page classes should not do that.
 - Do not destructure `loginPage`, `cartPage`, or any other page fixture in tests unless that fixture exists after applying operations.
 
 Example fixture registration:
@@ -240,9 +243,12 @@ Do not create TODO selector comments in generated runnable files. If selector ev
 
 - Use JavaScript ESM.
 - Extend `pages/BasePage.js` in page classes.
+- Export generated page classes as default exports only: `export default class FeaturePage extends BasePage`.
 - Put selectors only in `pageObjects/*.js`; put business actions and assertions in `pages/*.js`.
 - Use one meaningful action or assertion per page method.
 - Register page classes in the existing `fixtures/test.js` using lower-camel-case names.
+- In `fixtures/test.js`, import generated page classes with default imports only: `import FeaturePage from '../pages/FeaturePage.js';`.
+- Do not use named imports for generated page classes in fixtures, for example `import { CartPage } from '../pages/CartPage.js';` is invalid when `CartPage.js` contains `export default class CartPage`.
 - Import `test` only from `../fixtures/test.js`.
 - Prefer registered page fixtures in tests. Do not instantiate `new <Feature>Page(page)` inside tests when a matching fixture exists or is being registered in the same response.
 - Import page classes in tests from `../pages/<Feature>Page.js` only when direct construction is unavoidable; otherwise rely on the registered fixture import in `fixtures/test.js`.

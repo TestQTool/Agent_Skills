@@ -57,6 +57,8 @@ Treat as healable automation defects:
 - Locator not found.
 - Locator strict mode violation caused by weak/generated selector.
 - Incorrect locator definition or page method selector.
+- Page-object class uses `this.page` in a locator helper method but the constructor did not assign `this.page = page`.
+- Page class instantiates a page-object class without passing the active Playwright `page`.
 - Test references a missing key in `test-data/testdata.json` or `credentials.csv`.
 - Test uses stale generated data from another testcase ID.
 - Test hardcodes URL or credentials that should come from `.env` or test data.
@@ -112,6 +114,38 @@ this.loginButton = page.locator('button[type="submit"]');
 Do not use Playwright `locator.or()` in healed final code. If multiple selector candidates exist, choose the highest-priority candidate supported by DOM evidence and document rejected candidates in the healing reason or warnings, not in the source code.
 
 Do not add random class names, absolute XPath, nth-child selectors, positional selectors, or fallback selector chains that can hide strict-mode issues.
+
+## Page Object Constructor Healing Rules
+
+If the failure is similar to:
+
+```text
+TypeError: Cannot read properties of undefined (reading 'locator')
+at ../pageObjects/<Feature>PageObjects.js
+```
+
+inspect the referenced page-object class. If a method calls `this.page.locator(...)`, `this.page.getByRole(...)`, `this.page.getByLabel(...)`, or any other `this.page` access, patch the constructor to store the page:
+
+```js
+export class HomePageObjects {
+  constructor(page) {
+    this.page = page;
+    this.productLinks = page.locator('.card-title a');
+  }
+
+  getProductLink(productName) {
+    return this.page.locator(`.card-title a:has-text("${productName}")`);
+  }
+}
+```
+
+Also verify the matching page class passes the active page:
+
+```js
+this.locators = new HomePageObjects(page);
+```
+
+Do not replace this with a broad selector or a fixed wait. This is a wiring defect, not a timing defect.
 
 ## Test Data Healing Rules
 

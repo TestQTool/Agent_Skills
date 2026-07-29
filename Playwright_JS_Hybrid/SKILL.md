@@ -153,6 +153,7 @@ Keep locators/selectors separate from page actions/assertions:
 // pageObjects/LoginPageObjects.js
 export class LoginPageObjects {
   constructor(page) {
+    this.page = page;
     this.usernameInput = page.getByRole('textbox', { name: 'Username' });
     this.passwordInput = page.getByLabel('Password');
     this.loginButton = page.getByRole('button', { name: 'Log In' });
@@ -176,6 +177,29 @@ export default class LoginPage extends BasePage {
   }
 }
 ```
+Page-object constructor contract is mandatory:
+
+- Every `pageObjects/*PageObjects.js` class constructor that receives `page` must store it with `this.page = page`.
+- If any locator method uses `this.page.locator(...)`, `this.page.getByRole(...)`, `this.page.getByLabel(...)`, or any other `this.page` access, the constructor must set `this.page = page` before defining locator properties.
+- Page classes must instantiate page objects with the active Playwright page: `this.locators = new FeaturePageObjects(page)`.
+- Never generate `new FeaturePageObjects()` without the `page` argument.
+- Never generate page-object methods that call `this.page` unless `this.page` is initialized in that same class constructor.
+
+Correct dynamic locator pattern:
+
+```js
+export class CartPageObjects {
+  constructor(page) {
+    this.page = page;
+    this.cartTable = page.locator('#tbodyid');
+  }
+
+  getProductRow(productName) {
+    return this.page.locator(`#tbodyid tr:has-text("${productName}")`);
+  }
+}
+```
+
 Prefer selectors in this order:
 
 1. Stable selector evidence: `id`, `name`, `data-testid`, `data-test`, or `data-qa` from live inspection.

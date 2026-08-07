@@ -1,4 +1,4 @@
-﻿# Selenium Java BDD Run Healing
+# Selenium Java BDD Run Healing
 
 Use this file when generated `Selenium_Java_BDD` automation fails during Run Automation. These rules repair generated client automation only. They do not create new business test cases and they do not modify reference framework files.
 
@@ -51,6 +51,17 @@ Treat as healable:
 - Wrong generated import path, class casing, package/module name, or file placement.
 - Generated code hardcodes runtime data that should come from environment/config/test data.
 
+Treat as healable when the run reports no discovered tests, for example `NoTestsDiscoveredException: Suite [runner.SmokeRunner] did not discover any tests`:
+
+- Missing generated `.feature` file for a selected test case → create `src/test/java/features/<Feature>.feature` with the selected testcase scenario(s), the test case ID tag, and a runnable runner tag.
+- Generated feature file lacks the runnable runner tag required by the failing runner (`@smoke` for SmokeRunner, `@regression` for RegressionRunner) → add the missing runnable tag from the selected test case `tags`, never invent business tags.
+- Generated feature file carries only `@template` → that tag is filtered out by every runner; replace it with the test case ID tag plus a runnable runner tag.
+- Step definitions do not verbatim-match the Gherkin step text → align the `@Given`/`@When`/`@Then` annotation text to the feature file, or align the feature text to the approved testcase step wording, keeping one source of truth.
+- Page class missing `import base.BasePage;`, not extending `BasePage`, or missing the `(WebDriver driver)` constructor → patch the generated page class.
+- Page object class missing Selenium `By` locators or declaring methods → keep `pageObjects` as `public static final By` fields only.
+
+When a run discovers zero tests, inspect the generated branch before patching: confirm whether feature/step/page/page-object files exist and whether the selected runner's tag filter matches the generated tags. Patch the smallest missing piece. Do not remove or rewrite the framework-owned runner filters or `pom.xml` feature copying to force discovery.
+
 Treat as genuine app/test/environment failure and do not heal:
 
 - Application/API/mobile app behavior genuinely violates the approved expected result.
@@ -68,6 +79,17 @@ When uncertain, return `manual_review` with a clear reason.
 - Prefer stable evidence-backed selectors/object locators/schema fields over guessed wording.
 - Do not add absolute XPath, generated classes, positional selectors, random waits, fallback chains that hide ambiguity, or invented credentials.
 
+
+## Java Compile Healing Rules
+
+For `cannot find symbol: class BasePage` in generated page classes:
+- Patch only the generated `src/main/java/pages/<Feature>Page.java` file.
+- Ensure the file starts with `package pages;`.
+- Add `import base.BasePage;`.
+- Add `import org.openqa.selenium.WebDriver;` when constructor uses `WebDriver`.
+- Keep the class as `public class <Feature>Page extends BasePage`.
+- Keep the constructor as `public <Feature>Page(WebDriver driver) { super(driver); }`.
+- Do not create a duplicate `BasePage` class and do not move framework-owned files.
 ## Test Data Healing Rules
 
 If a test references missing data, patch only the generated test-data/config file and use only selected testcase data or existing approved runtime configuration.
@@ -131,16 +153,16 @@ Mapped updated static framework: D:\frameworks\StaticFrameworks\Web Automation\s
 These points were retained from older healing support folders before those folders were removed. Treat them as supporting guidance under the main healing contract above.
 
 From heal\SKILL.md:
-- # Skill: Heal Ã¢â‚¬â€ Fix Failing Tests and Broken Locators
+- # Skill: Heal â€” Fix Failing Tests and Broken Locators
 - ## When to use this skill
 - - App UI changes (locators broke)
 - - Feature file / step definition mismatch
 - - Framework upgrade
 - - New environment with different selectors
 - ## Triage Process
-- ### Step 1 Ã¢â‚¬â€ Read the failure
-- ### Step 2 Ã¢â‚¬â€ Classify the failure
-- ### Step 3 Ã¢â‚¬â€ Heal by category
+- ### Step 1 â€” Read the failure
+- ### Step 2 â€” Classify the failure
+- ### Step 3 â€” Heal by category
 - #### Locator broken (NoSuchElementException / TimeoutException)
 - 1. Navigate to the URL in the failing step
 - 2. Re-inspect the element using browser DevTools

@@ -20,6 +20,25 @@ Use updateagentskill/playwright/javascript/hybrid as a quality reference only. K
 - Runtime values such as URLs, usernames, passwords, tokens, and keys must not be hardcoded in generated source code.
 - Use environment/config files for base URL and valid/default credentials; use test-data files for testcase-specific values, negative credentials, expected messages, and alternate inputs.
 
+## Mandatory Per-Testcase Output
+
+For every selected runnable test case, generation must produce at minimum:
+
+- `src/test/java/features/<Feature>.feature`
+- `src/test/java/stepDefinitions/<Feature>Steps.java`
+- `src/main/java/pages/<Feature>Page.java`
+- `src/main/java/pageObjects/<Feature>PageObjects.java`
+- `test-data/**` when the test case needs testcase-specific runtime data
+
+Failure to include any mandatory file for a selected runnable test case must prevent a `ready` status. Generated feature scenarios must carry the test case ID tag plus a runnable runner tag (`@smoke`/`@regression`) so a framework runner discovers them; never tag generated files `@template`.
+
+## Generated File Conventions
+
+- Page classes: package `pages`, `import base.BasePage;`, `extends BasePage`, constructor `public <Feature>Page(WebDriver driver) { super(driver); }`, locators static-imported from `pageObjects.<Feature>PageObjects`.
+- Page objects: package `pageObjects`, only `import org.openqa.selenium.By;`, only `public static final By` constants.
+- Step definitions: package `stepDefinitions`, annotation text verbatim-matches Gherkin step text, thin one-page-method-per-step body.
+- Feature files must be discoverable by the mapped runner (framework `pom.xml` copies `src/test/java/features` to classpath `features`).
+
 ## Healing Contract
 
 - Healing repairs generated client automation only.

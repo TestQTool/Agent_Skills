@@ -18,7 +18,9 @@
                   "Do not output local absolute paths such as D:\\skills or D:\\frameworks as generated client paths.",
                   "Generated output must stay inside the selected client framework root.",
                   "Keep runtime secrets and environment values outside generated source code.",
-                  "Healing may patch generated client files only and should require rerun evidence before push."
+                  "Healing may patch generated client files only and should require rerun evidence before push.",
+                  "Every selected runnable test case requires four generated files: features/<Feature>.feature, stepDefinitions/<Feature>Steps.java, pages/<Feature>Page.java, and pageObjects/<Feature>PageObjects.java, plus test-data files when runtime data is needed.",
+                  "Generated feature scenarios carry the test case ID tag and a runnable runner tag (@smoke/@regression); never tag generated files @template."
               ],
     "staticFrameworkRunCommand":  "mvn test",
     "staticFrameworkTestPattern":  "src/test/java/features/**/*.feature",
